@@ -1,0 +1,16 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/libPs3/">
+    <Project Path="libPs3Core/libPs3Core.vcxproj" Id="bff54846-4634-4784-b732-2f611255b907" />
+    <Project Path="libPs3Decrypt/libPs3Decrypt.vcxproj" Id="073d8eca-b21f-4a78-8c0a-292ef2378ec0">
+      <BuildDependency Project="libPs3Core/libPs3Core.vcxproj" />
+    </Project>
+  </Folder>
+  <Project Path="PS3Player/PS3Player.vcxproj" Id="9820db42-e8a3-4c85-954d-6bbdc3df22b1">
+    <BuildDependency Project="libPs3Core/libPs3Core.vcxproj" />
+    <BuildDependency Project="libPs3Decrypt/libPs3Decrypt.vcxproj" />
+  </Project>
+</Solution>
