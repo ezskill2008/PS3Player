@@ -1,34 +1,48 @@
 #include <libPs3Decrypt/Include/DecryptISO.h>
 
-#include <fstream>
+#include <Windows.h>
 #include <filesystem>
 
 #pragma comment(lib, "libPs3Core.lib")
 
-struct IsoDisk_T {
-	uint32_t			regionCount{};
-	size_t				totalSize{};
-	std::ifstream		iFile{};
-	uint8_t				sector0[ISO_SECTOR_SIZE]{};
+struct DiskRegion {
+	uint32_t			start{};
+	uint32_t			end{};
+	bool				encrypted{};
 };
 
-size_t
-readEntireFile(const char* path,
-	std::unique_ptr<uint8_t[]>& data) {
-	if (!std::filesystem::exists(path)) {
-		DUMP_ERROR return 0;
-	}
+struct IsoDisk_T {
+	CryptKey			cryptKey{};
+	uint32_t			regionCount{};
+	size_t				totalSize{};
+	uint8_t				sector0[ISO_SECTOR_SIZE]{};
+	DiskRegion			regions[256]{};
+};
 
-	size_t size{ std::filesystem::file_size(path) };
-	if (size == 0) return 0;
+void
+f() {
+	OVERLAPPED overlapped{};
+	//ReadFile();
+}
 
-	data = std::make_unique<uint8_t[]>(size);
+HANDLE
+openFileForRead(const char* path) {
+	const int n = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);
+	if (n <= 0) return INVALID_HANDLE_VALUE;
+	wchar_t* wide = new (std::nothrow) wchar_t[n];
+	if (!wide) return INVALID_HANDLE_VALUE;
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wide, n);
 
-	std::ifstream ifile{ path, std::ios::in };
-	ifile.read((char*)data.get(), size);
-	ifile.close();
+	HANDLE h{ CreateFileW(wide,
+		GENERIC_READ,
+		FILE_SHARE_READ,
+		nullptr,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
+		nullptr) };
+	delete[] wide;
 
-	return size;
+	return h;
 }
 
 bool
@@ -58,9 +72,9 @@ LpsLoadDisk(
 	IsoDisk_T* temp{ new IsoDisk_T() };
 	if (!temp) { DUMP_ERROR return false; }
 
+	std::ifstream iFile{ path, std::ios::binary };
+	
 	temp->totalSize = std::filesystem::file_size(path);
-	temp->iFile.open(path);
-	temp->iFile.read((char*)&temp->sector0[0], ISO_SECTOR_SIZE);
 	temp->regionCount = BSwap32(LcRead32(&temp->sector0[0]));
 
 	disk = temp;
@@ -71,7 +85,6 @@ LpsLoadDisk(
 void
 LpsReleaseDisk(IsoDisk& disk) {
 	if (!disk) { DUMP_ERROR return; }
-	disk->iFile.close();
 
 	delete disk;
 }
