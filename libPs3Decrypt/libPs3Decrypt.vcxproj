@@ -20,13 +20,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\DecryptISO.h" />
+    <ClInclude Include="Include\DecryptSELF.h" />
+    <ClInclude Include="Src\ReadFile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DecryptISO.cpp" />
+    <ClCompile Include="Src\DecryptSELF.cpp" />
+    <ClCompile Include="Src\ReadFile.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
+    <VcpkgEnabled>true</VcpkgEnabled>
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
     <ProjectGuid>{073d8eca-b21f-4a78-8c0a-292ef2378ec0}</ProjectGuid>
     <RootNamespace>libPs3Decrypt</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>

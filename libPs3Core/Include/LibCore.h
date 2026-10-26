@@ -67,3 +67,38 @@ LcRead64BE(uint8_t* stream) {
 	memcpy(&value, stream, sizeof(uint64_t));
 	return BSwap64(value);
 }
+
+inline uint16_t
+Be16(const uint8_t* p) {
+	return uint16_t((p[0] << 8) | p[1]); 
+}
+
+inline uint32_t
+Be32(const uint8_t* p) { 
+	return (uint32_t{ p[0] } << 24) | (uint32_t{ p[1] } << 16) | 
+		(uint32_t{ p[2] } << 8) | uint32_t{ p[3] }; 
+}
+
+inline uint64_t
+Be64(const uint8_t* p) { 
+	return (uint64_t{ Be32(p) } << 32) | Be32(p + 4); 
+}
+
+inline uint16_t
+Le16(const uint8_t* p) {
+	return uint16_t(p[0]) | (uint16_t(p[1]) << 8);
+}
+
+inline uint32_t
+Le32(const uint8_t* p) {
+	return uint32_t(p[0]) | (uint32_t(p[1]) << 8) |
+		(uint32_t(p[2]) << 16) | (uint32_t(p[3]) << 24);
+}
+
+inline uint64_t
+Le64(const uint8_t* p) {
+	return uint64_t(p[0]) | (uint64_t(p[1]) << 8) |
+		(uint64_t(p[2]) << 16) | (uint64_t(p[3]) << 24) |
+		(uint64_t(p[4]) << 32) | (uint64_t(p[5]) << 40) |
+		(uint64_t(p[6]) << 48) | (uint64_t(p[7]) << 56);
+}

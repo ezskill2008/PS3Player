@@ -1,0 +1,15 @@
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/CMakeFiles/zlib.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/CMakeFiles/package.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/CMakeFiles/package_source.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/CMakeFiles/edit_cache.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/CMakeFiles/rebuild_cache.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/CMakeFiles/list_install_components.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/CMakeFiles/install.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/CMakeFiles/install/local.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/contrib/CMakeFiles/package.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/contrib/CMakeFiles/package_source.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/contrib/CMakeFiles/edit_cache.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/contrib/CMakeFiles/rebuild_cache.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/contrib/CMakeFiles/list_install_components.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/contrib/CMakeFiles/install.dir
+D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/contrib/CMakeFiles/install/local.dir

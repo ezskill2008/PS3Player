@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/cmake_install.cmake",
+		"D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-rel/contrib/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

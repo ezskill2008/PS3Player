@@ -1,4 +1,5 @@
 #include <libPs3Decrypt/Include/DecryptISO.h>
+#include <libPs3Decrypt/Include/DecryptSELF.h>
 
 #pragma comment(lib, "libPs3Core.lib")
 #pragma comment(lib, "libPs3Decrypt.lib")
@@ -59,12 +60,28 @@ int main() {
 
 	// read EBOOT.BIN fully
 	IsoFile f{ nullptr };
-	if (LpsOpenFile(disk, "PS3_GAME/USRDIR/EBOOT.BIN", f)) {
-		std::vector<uint8_t> eboot(size_t(LpsFileSize(f)));
-		const size_t got{ LpsReadFile(f, 0, eboot.data(), eboot.size()) };
-		// got == eboot.size(), and eboot[0..3] should be 53 43 45 00 ("SCE\0")
-		LpsCloseFile(f);
+	if (!LpsOpenFile(disk, "PS3_GAME/USRDIR/EBOOT.BIN", f)) {
+		LpsReleaseDisk(disk);
+		return -1;
 	}
+
+	std::vector<uint8_t> eboot(size_t(LpsFileSize(f)));
+	const size_t got{ LpsReadFile(f, 0, eboot.data(), eboot.size()) };
+	// got == eboot.size(), and eboot[0..3] should be 53 43 45 00 ("SCE\0")
+	LpsCloseFile(f);
+
+	SelfKeys keys{};
+
+	if (!LpsLoadSelfKeys("D:\\code\\PS3Content\\keys.txt", keys))
+		return -1;
+
+	size_t elfSize{ 0 };
+	if (!LpsSelfToElf(keys, eboot.data(), eboot.size(), nullptr, 0, elfSize))
+		return -1;
+
+	std::vector<uint8_t> elf(elfSize);
+	if (!LpsSelfToElf(keys, eboot.data(), eboot.size(), elf.data(), elf.size(), elfSize))
+		return -1;
 
 	LpsReleaseDisk(disk);
 

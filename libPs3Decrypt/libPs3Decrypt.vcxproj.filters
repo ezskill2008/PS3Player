@@ -18,9 +18,21 @@
     <ClInclude Include="Include\DecryptISO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\DecryptSELF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ReadFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DecryptISO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DecryptSELF.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ReadFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

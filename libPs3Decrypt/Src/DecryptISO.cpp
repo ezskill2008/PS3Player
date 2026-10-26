@@ -1,4 +1,5 @@
 #include <libPs3Decrypt/Include/DecryptISO.h>
+#include <libPs3Decrypt/Src/ReadFile.h>
 
 #include <Windows.h>
 #include <filesystem>
@@ -47,17 +48,6 @@ struct IsoFile_T {
 	uint64_t			size{ 0 };
 };
 
-uint32_t
-be32(const uint8_t* s) {
-	return (uint32_t(s[0]) << 24) | (uint32_t(s[1]) << 16) |
-		(uint32_t(s[2]) << 8) | uint32_t(s[3]);
-}
-
-uint32_t
-le32(const uint8_t* p) {
-	return uint32_t(p[0]) | (uint32_t(p[1]) << 8) | (uint32_t(p[2]) << 16) | (uint32_t(p[3]) << 24);
-}
-
 std::string
 upperCase(const char* s) {
 	std::string out{ s };
@@ -67,50 +57,6 @@ upperCase(const char* s) {
 	}
 
 	return out;
-}
-
-bool
-readAt(HANDLE h, uint64_t offset, void* dst, size_t size) {
-	uint8_t* p = static_cast<uint8_t*>(dst);
-	while (size > 0) {
-		const DWORD chunk{ size > 0x40000000u ? 0x40000000u : static_cast<DWORD>(size) };
-		OVERLAPPED ov{};
-		ov.Offset = static_cast<DWORD>(offset & 0xFFFFFFFFu);
-		ov.OffsetHigh = static_cast<DWORD>(offset >> 32);
-
-		DWORD got{ 0 };
-		if (!ReadFile(h, p, chunk, &got, &ov) || got == 0)
-			return false;
-
-		p += got;
-		offset += got;
-		size -= got;
-	}
-	
-	return true;
-}
-
-HANDLE
-openForRead(const char* path) {
-	const int n{ MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0) };
-	if (n <= 0) return INVALID_HANDLE_VALUE;
-	wchar_t* wide{ new NOTHROW wchar_t[n] };
-	if (!wide) return INVALID_HANDLE_VALUE;
-	MultiByteToWideChar(CP_UTF8, 0, path, -1, wide, n);
-
-	HANDLE h{ CreateFileW(wide, GENERIC_READ, FILE_SHARE_READ, nullptr,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, nullptr) };
-	delete[] wide;
-
-	return h;
-}
-
-int
-hexVal(char c) {
-	if (c >= '0' && c <= '9') return c - '0';
-	if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-	if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-	return -1;
 }
 
 bool
@@ -173,8 +119,8 @@ walkDir(const uint8_t* buf, uint32_t size, F cb) {
 		const uint8_t* r{ buf + pos };
 
 		DirEntry e{};
-		e.lba = le32(r + 2);
-		e.size = le32(r + 10);
+		e.lba = Le32(r + 2);
+		e.size = Le32(r + 10);
 		e.isDir = (r[25] & 0x02) != 0;
 
 		const uint8_t n{ r[32] };
@@ -327,12 +273,12 @@ LpsLoadDisk(
 
 	// All header fields are big-endian. A count of 0 (or an implausible one)
 	// means sector 0 is the ISO9660 system area, i.e. an already decrypted image.
-	const uint32_t count{ be32(sector0) };
+	const uint32_t count{ Be32(sector0) };
 
 	if (count >= 1 && count <= 255) {
 		uint32_t e[512]{};
 		for (uint32_t j{ 0 }; j < count * 2; ++j)
-			e[j] = be32(&sector0[8 + j * 4]);
+			e[j] = Be32(&sector0[8 + j * 4]);
 
 		uint32_t n{ 0 };
 		bool valid{ true };
@@ -437,8 +383,8 @@ LpsMountFileSys(
 	if (!LpsReadSectors(disk, 16, 1, pvd)) return false;
 	if (!validatePVD(pvd)) return false;
 
-	disk->rootLba = le32(pvd + 156 + 2);
-	disk->rootSize = le32(pvd + 156 + 10);
+	disk->rootLba = Le32(pvd + 156 + 2);
+	disk->rootSize = Le32(pvd + 156 + 10);
 	
 	return true;
 }
@@ -465,7 +411,7 @@ LpsOpenFile(
 	DirEntry e{};
 	if (!d || !path || !lookup(d, path, e) || e.isDir) return false;
 	
-	file = new NOTHROW IsoFile_T{ d, e.lba, e.size };
+	file = new NOTHROW IsoFile_T(d, e.lba, e.size);
 	
 	return file != nullptr;
 }
