@@ -1,2 +1,0 @@
-#define LPS_API __declspec(dllimport)
-#define LPS_API __declspec(dllexport)

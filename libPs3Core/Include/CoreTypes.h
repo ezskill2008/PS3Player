@@ -8,3 +8,5 @@
 #else
 #define LPS_API __declspec(dllimport)
 #endif
+
+#define NOTHROW (std::nothrow)

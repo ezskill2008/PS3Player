@@ -4,6 +4,28 @@
 #pragma comment(lib, "libPs3Decrypt.lib")
 
 #include <Windows.h>
+#include <vector>
+#include <string>
+
+void
+PrintTree(IsoDisk disk, const std::string& dir) {
+	struct Ctx { IsoDisk disk; const std::string* dir; };
+	Ctx ctx{ disk, &dir };
+
+	LpsListDir(disk, dir.c_str(), [](const char* name, const IsoFileInfo* info, void* user) {
+		const Ctx& c{ *static_cast<Ctx*>(user) };
+		const std::string full{ *c.dir + "/" + name };
+
+		if (info->isDirectory) {
+			printf("%s/\n", full.c_str());
+			PrintTree(c.disk, full);
+		}
+		else {
+			printf("%s  (%llu bytes)\n", full.c_str(), (unsigned long long)info->size);
+		}
+		return true;
+		}, &ctx);
+}
 
 int main() {
 #if _DEBUG
@@ -11,15 +33,40 @@ int main() {
 #endif
 	CryptKey isoKey{};
 	if (!LpsReadKey(
-		"D:\\code\\PS3Content\\Minerva_Myrient\\Redump\\Sony - PlayStation 3 - Disc Keys\\Angry Birds Trilogy (Europe) (En,Fr,De,Es,It).key",
+		"D:\\code\\PS3Content\\Minerva_Myrient\\Redump\\Sony - PlayStation 3 - Disc Keys\\Brain Challenge (Europe) (En,Fr,De,Es,It,Nl).key",
 		isoKey))
 		return -1;
 
 	IsoDisk disk{};
 	if (!LpsLoadDisk(
-		"D:\\code\\PS3Content\\Minerva_Myrient\\Redump\\Sony - PlayStation 3\\Angry Birds Trilogy (Europe) (En,Fr,De,Es,It).iso",
+		"D:\\code\\PS3Content\\Minerva_Myrient\\Redump\\Sony - PlayStation 3\\Brain Challenge (Europe) (En,Fr,De,Es,It,Nl).iso",
 		disk))
 		return -1;;
+
+	if (!(LpsSetDiskKey(disk, isoKey)
+		&& LpsMountFileSys(disk))) {
+		LpsReleaseDisk(disk);
+		return -1;
+	}
+
+	PrintTree(disk, "");
+
+	LpsListDir(disk, "/", [](const char* name, const IsoFileInfo* info, void*) {
+		printf("%s %s %llu\n", info->isDirectory ? "<DIR>" : "     ", name,
+			(unsigned long long)info->size);
+		return true;
+		}, nullptr);
+
+	// read EBOOT.BIN fully
+	IsoFile f{ nullptr };
+	if (LpsOpenFile(disk, "PS3_GAME/USRDIR/EBOOT.BIN", f)) {
+		std::vector<uint8_t> eboot(size_t(LpsFileSize(f)));
+		const size_t got{ LpsReadFile(f, 0, eboot.data(), eboot.size()) };
+		// got == eboot.size(), and eboot[0..3] should be 53 43 45 00 ("SCE\0")
+		LpsCloseFile(f);
+	}
+
+	LpsReleaseDisk(disk);
 
 	return 0;
 }
