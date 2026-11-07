@@ -1,5 +1,8 @@
 #pragma once
+#define NOMINMAX
+
 #include <stdint.h>
+#include <Windows.h>
 
 #define CORE_API __declspec(dllexport)
 

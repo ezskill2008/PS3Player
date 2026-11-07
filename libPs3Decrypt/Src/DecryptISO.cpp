@@ -1,7 +1,6 @@
 #include <libPs3Decrypt/Include/DecryptISO.h>
 #include <libPs3Decrypt/Src/ReadFile.h>
 
-#include <Windows.h>
 #include <filesystem>
 #include <bcrypt.h>
 #include <unordered_map>

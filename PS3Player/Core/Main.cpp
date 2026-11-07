@@ -1,3 +1,5 @@
+#include <PS3Player/Elf/Elf.h>
+
 #include <libPs3Decrypt/Include/DecryptISO.h>
 #include <libPs3Decrypt/Include/DecryptSELF.h>
 
@@ -58,7 +60,7 @@ int main() {
 		return true;
 		}, nullptr);
 
-	// read EBOOT.BIN fully
+	// read EBOOT.BIN
 	IsoFile f{ nullptr };
 	if (!LpsOpenFile(disk, "PS3_GAME/USRDIR/EBOOT.BIN", f)) {
 		LpsReleaseDisk(disk);
@@ -82,6 +84,9 @@ int main() {
 	std::vector<uint8_t> elf(elfSize);
 	if (!LpsSelfToElf(keys, eboot.data(), eboot.size(), elf.data(), elf.size(), elfSize))
 		return -1;
+
+	Elf64_Program prg{};
+	LoadElfProgram(elf, prg);
 
 	LpsReleaseDisk(disk);
 
