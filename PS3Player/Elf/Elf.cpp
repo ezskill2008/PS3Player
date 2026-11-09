@@ -66,11 +66,9 @@ parsEntry() {
 bool
 LoadElfProgram(
 	const std::vector<uint8_t>& elf,
+	GuestMem& mem,
 	Elf64_Program& prg) {
-	if (prg.mem.base) prg.mem.Release();
-	prg = {};
-	if (!prg.mem.Init()) return false;
-	if (!prg.mem.base) return false;//To step intellisense crying
+	if (!mem.base) return false;
 
 	if (!readElfEhdr(elf, prg.ehdr)) return false;
 
@@ -91,13 +89,13 @@ LoadElfProgram(
 
 		if (p.vaddr + p.memsz > GuestMem::kSize || p.offset + p.filesz > elf.size()) return false;
 
-		if (!prg.mem.Map(
+		if (!mem.Map(
 			(uint32_t)p.vaddr,
 			p.memsz,
 			(p.flags & PF_EXEC)))
 			return false;
 
-		memcpy(prg.mem.base + p.vaddr, elf.data() + p.offset, (size_t)p.filesz);
+		memcpy(mem.base + p.vaddr, elf.data() + p.offset, (size_t)p.filesz);
 	}
 
 	return true;

@@ -28,7 +28,7 @@ enum ElfMachine : uint16_t {
 enum ElfPermFlags : uint32_t {
     PF_NONE = 0,
     PF_EXEC = 0x1,             // Execute
-    PF_WRITE = 0x2,             // Write
+    PF_WRITE = 0x2,            // Write
     PF_READ = 0x4,             // Read
 };
 
@@ -68,10 +68,10 @@ struct Elf64_Entry {
 struct Elf64_Program {
     Elf64_Ehdr              ehdr{};
     std::vector<Elf64_Phdr> phdrs{};
-    GuestMem                mem{};
     Elf64_Entry             entry{};
 };
 
 bool LoadElfProgram(
     const std::vector<uint8_t>& elf,
+    GuestMem& mem,
     Elf64_Program& prg);

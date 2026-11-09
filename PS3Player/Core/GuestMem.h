@@ -26,9 +26,10 @@ struct GuestMem {
 
 	void Release() {
 		if (base) {
-			VirtualFree(base, 0, MEM_FREE);
+			VirtualFree(base, 0, MEM_RELEASE);
 			base = nullptr;
 		}
+
 		ranges = {};
 	}
 

@@ -33,6 +33,7 @@ PrintTree(IsoDisk disk, const std::string& dir) {
 int main() {
 #if _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetBreakAlloc(152);
 #endif
 	CryptKey isoKey{};
 	if (!LpsReadKey(
@@ -85,10 +86,20 @@ int main() {
 	if (!LpsSelfToElf(keys, eboot.data(), eboot.size(), elf.data(), elf.size(), elfSize))
 		return -1;
 
+	GuestMem      mem{};
 	Elf64_Program prg{};
-	LoadElfProgram(elf, prg);
 
+	if (!mem.Init()) {
+		LpsReleaseDisk(disk);
+		return -1;
+	}
+
+	LoadElfProgram(elf, mem, prg);
+
+	LpsReleaseSelfKeys(keys);
 	LpsReleaseDisk(disk);
+
+	mem.Release();
 
 	return 0;
 }
