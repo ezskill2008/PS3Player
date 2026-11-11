@@ -85,6 +85,8 @@ int main() {
 	std::vector<uint8_t> elf(elfSize);
 	if (!LpsSelfToElf(keys, eboot.data(), eboot.size(), elf.data(), elf.size(), elfSize))
 		return -1;
+	
+	LpsReleaseSelfKeys(keys);
 
 	GuestMem      mem{};
 	Elf64_Program prg{};
@@ -96,10 +98,20 @@ int main() {
 
 	LoadElfProgram(elf, mem, prg);
 
-	LpsReleaseSelfKeys(keys);
-	LpsReleaseDisk(disk);
+	elf = {};
+
+	SysProcessParam procParams{};
+	LoadProcessParams(mem, prg, procParams);
+
+	SysProcPrxParam prxParams{};
+	LoadPrxParams(mem, prg, prxParams);
+	
+	if (!(procParams.magic == PROCPARAMS_MAGIC
+		&& prxParams.magic == PRXPARAMS_MAGIC))
+		return false;
 
 	mem.Release();
+	LpsReleaseDisk(disk);
 
 	return 0;
 }

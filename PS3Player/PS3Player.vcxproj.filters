@@ -21,12 +21,24 @@
     <ClCompile Include="Elf\Elf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DissAsm\DissAsm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Instructions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Elf\Elf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\GuestMem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DissAsm\DissAsm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Instructions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

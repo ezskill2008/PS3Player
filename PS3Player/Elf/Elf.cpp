@@ -58,9 +58,14 @@ readElfPhdr(
 	return true;
 }
 
-Elf64_Entry
-parsEntry() {
-	return {};
+bool
+readOpd(const GuestMem& mem, uint32_t addr, Elf64_Opd& opd) {
+	if (!mem.IsMapped(addr, sizeof(Elf64_Opd))) return false;
+
+	opd.entryPc = mem.Read32(addr);
+	opd.toc = mem.Read32(addr + 4);
+
+	return true;
 }
 
 bool
@@ -68,8 +73,7 @@ LoadElfProgram(
 	const std::vector<uint8_t>& elf,
 	GuestMem& mem,
 	Elf64_Program& prg) {
-	if (!mem.base) return false;
-
+	if (!(elf.size() && elf.data() && mem.base)) return false;
 	if (!readElfEhdr(elf, prg.ehdr)) return false;
 
 	const uint32_t phnum{ prg.ehdr.phnum };
@@ -97,6 +101,88 @@ LoadElfProgram(
 
 		memcpy(mem.base + p.vaddr, elf.data() + p.offset, (size_t)p.filesz);
 	}
+
+	if (!readOpd(mem, (uint32_t)prg.ehdr.entry, prg.opd)) return false;
+	if (!mem.IsExecutable(prg.opd.entryPc))		return false;
+
+	return true;
+}
+
+bool
+LoadProcessParams(
+	const GuestMem& mem,
+	const Elf64_Program& prg,
+	SysProcessParam& params) {
+	params = {};
+	if (!(mem.base && !prg.phdrs.empty())) return false;
+
+	uint32_t index{ 0 };
+
+	for (; index < prg.phdrs.size(); ++index)
+		if (prg.phdrs[index].type == PT_PROCPARAMS)
+			break;
+
+	if (index == prg.phdrs.size()) return false;
+
+	const Elf64_Phdr& phdr{ prg.phdrs[index] };
+
+	if (!mem.IsMapped((uint32_t)phdr.vaddr, 0x20)) return false;
+
+	const uint8_t* const base{ mem.base + phdr.vaddr };
+	const uint32_t size{ BSwap32(LcRead32(base)) };
+
+	if (size < 0x20 || !mem.IsMapped((uint32_t)phdr.vaddr, size)) return false;
+	memcpy(&params, base, size);
+	
+	params.size = BSwap32(params.size);
+	params.magic = BSwap32(params.magic);
+	params.version = BSwap32(params.version);
+	params.sdkVersion = BSwap32(params.sdkVersion);
+	params.primaryPrio = BSwap32(params.primaryPrio);
+	params.primaryStackSize = BSwap32(params.primaryStackSize);
+	params.mallocPageSize = BSwap32(params.mallocPageSize);
+	params.ppcSeg = BSwap32(params.ppcSeg);
+	params.crashDumpParamAddr = BSwap32(params.crashDumpParamAddr);
+
+	return true;
+}
+
+bool
+LoadPrxParams(
+	const GuestMem& mem,
+	const Elf64_Program& prg,
+	SysProcPrxParam& params) {
+	params = {};
+	if (!(mem.base && !prg.phdrs.empty())) return false;
+
+	uint32_t index{ 0 };
+
+	for (; index < prg.phdrs.size(); ++index)
+		if (prg.phdrs[index].type == PT_PRXPARAMS)
+			break;
+
+	if (index == prg.phdrs.size()) return false;
+
+	const Elf64_Phdr& phdr{ prg.phdrs[index] };
+
+	if (!mem.IsMapped((uint32_t)phdr.vaddr, 0x28)) return false;
+	const uint8_t* const base{ mem.base + phdr.vaddr };
+	const uint32_t size{ BSwap32(LcRead32(base)) };
+
+	if (size < 0x28 || !mem.IsMapped((uint32_t)phdr.vaddr, size)) return false;
+	memcpy(&params, base, size);
+
+	params.size = BSwap32(params.size);
+	params.magic = BSwap32(params.magic);
+	params.version = BSwap32(params.version);
+	params.pad0 = BSwap32(params.pad0);
+	params.libEntStart = BSwap32(params.libEntStart);
+	params.libEntEnd = BSwap32(params.libEntEnd);
+	params.libStubStart = BSwap32(params.libStubStart);
+	params.libStubEnd = BSwap32(params.libStubEnd);
+	params.ver = BSwap16(params.ver);
+	params.pad1 = BSwap16(params.pad1);
+	params.pad2 = BSwap32(params.pad2);
 
 	return true;
 }

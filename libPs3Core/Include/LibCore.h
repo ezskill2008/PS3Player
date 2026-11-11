@@ -27,76 +27,76 @@ BSwap64(uint64_t b) {
 }
 
 inline uint16_t
-LcRead16(uint8_t* stream) {
+LcRead16(const uint8_t* const stream) {
 	uint16_t value{ 0 };
 	memcpy(&value, stream, sizeof(uint16_t));
 	return value;
 }
 
 inline uint32_t
-LcRead32(uint8_t* stream) {
+LcRead32(const uint8_t* const stream) {
 	uint32_t value{ 0 };
 	memcpy(&value, stream, sizeof(uint32_t));
 	return value;
 }
 
 inline uint64_t
-LcRead64(uint8_t* stream) {
+LcRead64(const uint8_t* const stream) {
 	uint64_t value{ 0 };
 	memcpy(&value, stream, sizeof(uint64_t));
 	return value;
 }
 
 inline uint16_t
-LcRead16BE(uint8_t* stream) {
+LcRead16BE(const uint8_t* const stream) {
 	uint16_t value{ 0 };
 	memcpy(&value, stream, sizeof(uint16_t));
 	return BSwap16(value);
 }
 
 inline uint32_t
-LcRead32BE(uint8_t* stream) {
+LcRead32BE(const uint8_t* const stream) {
 	uint32_t value{ 0 };
 	memcpy(&value, stream, sizeof(uint32_t));
 	return BSwap32(value);
 }
 
 inline uint64_t
-LcRead64BE(uint8_t* stream) {
+LcRead64BE(const uint8_t* const stream) {
 	uint64_t value{ 0 };
 	memcpy(&value, stream, sizeof(uint64_t));
 	return BSwap64(value);
 }
 
 inline uint16_t
-Be16(const uint8_t* p) {
+Be16(const uint8_t* const p) {
 	return uint16_t((p[0] << 8) | p[1]); 
 }
 
 inline uint32_t
-Be32(const uint8_t* p) { 
+Be32(const uint8_t* const p) {
 	return (uint32_t{ p[0] } << 24) | (uint32_t{ p[1] } << 16) | 
 		(uint32_t{ p[2] } << 8) | uint32_t{ p[3] }; 
 }
 
 inline uint64_t
-Be64(const uint8_t* p) { 
+Be64(const uint8_t* const p) {
 	return (uint64_t{ Be32(p) } << 32) | Be32(p + 4); 
 }
 
 inline uint16_t
-Le16(const uint8_t* p) {
+Le16(const uint8_t* const p) {
 	return uint16_t(p[0]) | (uint16_t(p[1]) << 8);
 }
 
 inline uint32_t
-Le32(const uint8_t* p) {
+Le32(const uint8_t* const p) {
 	return uint32_t(p[0]) | (uint32_t(p[1]) << 8) |
 		(uint32_t(p[2]) << 16) | (uint32_t(p[3]) << 24);
 }
 
 inline uint64_t
-Le64(const uint8_t* p) {
+Le64(const uint8_t* const p) {
 	return uint64_t(p[0]) | (uint64_t(p[1]) << 8) |
 		(uint64_t(p[2]) << 16) | (uint64_t(p[3]) << 24) |
 		(uint64_t(p[4]) << 32) | (uint64_t(p[5]) << 40) |

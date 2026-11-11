@@ -143,11 +143,15 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Instructions.cpp" />
     <ClCompile Include="Core\Main.cpp" />
+    <ClCompile Include="DissAsm\DissAsm.cpp" />
     <ClCompile Include="Elf\Elf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\GuestMem.h" />
+    <ClInclude Include="Core\Instructions.h" />
+    <ClInclude Include="DissAsm\DissAsm.h" />
     <ClInclude Include="Elf\Elf.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

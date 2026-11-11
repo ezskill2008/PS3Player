@@ -1,6 +1,17 @@
 #pragma once
 #include <libPs3Core/Include/LibCore.h>
 
+/*
+DecryptISO.h
+A minimalist loader for loading a .iso file and
+decrypting it given the disk keys, which should be
+loaded from a seperate file.
+
+Future additions:
+ - Further key storage improvement:
+	Loading from memory
+*/
+
 #define ISO_KEY_SIZE 16
 #define ISO_SECTOR_SIZE 2048
 

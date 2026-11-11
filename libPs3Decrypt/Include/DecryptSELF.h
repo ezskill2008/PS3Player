@@ -1,6 +1,12 @@
 #pragma once
 #include <libPs3Core/Include/LibCore.h>
 
+/*
+DecryptSELF.h
+A minimalist implementation to convert decrypted 
+.SELF into usable .ELF using a self key.
+*/
+
 typedef struct SelfKeys_T* SelfKeys;
 
 LPS_API bool LpsLoadSelfKeys(
