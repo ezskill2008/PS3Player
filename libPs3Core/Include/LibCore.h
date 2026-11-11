@@ -70,18 +70,18 @@ LcRead64BE(const uint8_t* const stream) {
 
 inline uint16_t
 Be16(const uint8_t* const p) {
-	return uint16_t((p[0] << 8) | p[1]); 
+	return uint16_t((p[0] << 8) | p[1]);
 }
 
 inline uint32_t
 Be32(const uint8_t* const p) {
-	return (uint32_t{ p[0] } << 24) | (uint32_t{ p[1] } << 16) | 
-		(uint32_t{ p[2] } << 8) | uint32_t{ p[3] }; 
+	return (uint32_t{ p[0] } << 24) | (uint32_t{ p[1] } << 16) |
+		(uint32_t{ p[2] } << 8) | uint32_t{ p[3] };
 }
 
 inline uint64_t
 Be64(const uint8_t* const p) {
-	return (uint64_t{ Be32(p) } << 32) | Be32(p + 4); 
+	return (uint64_t{ Be32(p) } << 32) | Be32(p + 4);
 }
 
 inline uint16_t

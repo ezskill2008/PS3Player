@@ -20,9 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\CoreTypes.h" />
+    <ClInclude Include="Include\Instructions.h" />
     <ClInclude Include="Include\LibCore.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Instructions.cpp" />
     <ClCompile Include="Src\LibCore.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
