@@ -14,19 +14,19 @@ readElfEhdr(
 	for (uint32_t i{ 0 }; i < 4; ++i)
 		if (hdr.ident[i] != kElfMagic[i]) return false;
 
-	hdr.type = Be16(&elf[offsetof(Elf64_Ehdr, type)]);
-	hdr.machine = Be16(&elf[offsetof(Elf64_Ehdr, machine)]);
-	hdr.version = Be32(&elf[offsetof(Elf64_Ehdr, version)]);
-	hdr.entry = Be64(&elf[offsetof(Elf64_Ehdr, entry)]);
-	hdr.phoff = Be64(&elf[offsetof(Elf64_Ehdr, phoff)]);
-	hdr.shoff = Be64(&elf[offsetof(Elf64_Ehdr, shoff)]);
-	hdr.flags = Be32(&elf[offsetof(Elf64_Ehdr, flags)]);
-	hdr.ehsize = Be16(&elf[offsetof(Elf64_Ehdr, ehsize)]);
-	hdr.phentsize = Be16(&elf[offsetof(Elf64_Ehdr, phentsize)]);
-	hdr.phnum = Be16(&elf[offsetof(Elf64_Ehdr, phnum)]);
-	hdr.shentsize = Be16(&elf[offsetof(Elf64_Ehdr, shentsize)]);
-	hdr.shnum = Be16(&elf[offsetof(Elf64_Ehdr, shnum)]);
-	hdr.shstrndx = Be16(&elf[offsetof(Elf64_Ehdr, shstrndx)]);
+	hdr.type = LcBe16(&elf[offsetof(Elf64_Ehdr, type)]);
+	hdr.machine = LcBe16(&elf[offsetof(Elf64_Ehdr, machine)]);
+	hdr.version = LcBe32(&elf[offsetof(Elf64_Ehdr, version)]);
+	hdr.entry = LcBe64(&elf[offsetof(Elf64_Ehdr, entry)]);
+	hdr.phoff = LcBe64(&elf[offsetof(Elf64_Ehdr, phoff)]);
+	hdr.shoff = LcBe64(&elf[offsetof(Elf64_Ehdr, shoff)]);
+	hdr.flags = LcBe32(&elf[offsetof(Elf64_Ehdr, flags)]);
+	hdr.ehsize = LcBe16(&elf[offsetof(Elf64_Ehdr, ehsize)]);
+	hdr.phentsize = LcBe16(&elf[offsetof(Elf64_Ehdr, phentsize)]);
+	hdr.phnum = LcBe16(&elf[offsetof(Elf64_Ehdr, phnum)]);
+	hdr.shentsize = LcBe16(&elf[offsetof(Elf64_Ehdr, shentsize)]);
+	hdr.shnum = LcBe16(&elf[offsetof(Elf64_Ehdr, shnum)]);
+	hdr.shstrndx = LcBe16(&elf[offsetof(Elf64_Ehdr, shstrndx)]);
 
 	if (hdr.machine != EM_PPC64) return false;
 	if (!hdr.version) return false;
@@ -46,14 +46,14 @@ readElfPhdr(
 	if (!(elf.data() && off + sizeof(Elf64_Phdr) <= elf.size())) return false;
 
 	memcpy(&hdr, elf.data() + off, sizeof(Elf64_Phdr));
-	hdr.type = BSwap32(hdr.type);
-	hdr.flags = BSwap32(hdr.flags);
-	hdr.offset = BSwap64(hdr.offset);
-	hdr.vaddr = BSwap64(hdr.vaddr);
-	hdr.paddr = BSwap64(hdr.paddr);
-	hdr.filesz = BSwap64(hdr.filesz);
-	hdr.memsz = BSwap64(hdr.memsz);
-	hdr.align = BSwap64(hdr.align);
+	hdr.type = LcBSwap32(hdr.type);
+	hdr.flags = LcBSwap32(hdr.flags);
+	hdr.offset = LcBSwap64(hdr.offset);
+	hdr.vaddr = LcBSwap64(hdr.vaddr);
+	hdr.paddr = LcBSwap64(hdr.paddr);
+	hdr.filesz = LcBSwap64(hdr.filesz);
+	hdr.memsz = LcBSwap64(hdr.memsz);
+	hdr.align = LcBSwap64(hdr.align);
 
 	return true;
 }
@@ -90,7 +90,7 @@ LoadElfProgram(
 	for (uint16_t i{ 0 }; i < phnum; ++i) {
 		const Elf64_Phdr& p{ prg.phdrs[i] };
 		if (p.type != PT_LOAD) continue;
-
+		if (p.memsz == 0) continue;
 		if (p.vaddr + p.memsz > GuestMem::kSize || p.offset + p.filesz > elf.size()) return false;
 
 		if (!mem.Map(
@@ -129,20 +129,20 @@ LoadProcessParams(
 	if (!mem.IsMapped((uint32_t)phdr.vaddr, 0x20)) return false;
 
 	const uint8_t* const base{ mem.base + phdr.vaddr };
-	const uint32_t size{ BSwap32(LcRead32(base)) };
+	const uint32_t size{ LcBSwap32(LcRead32(base)) };
 
 	if (size < 0x20 || !mem.IsMapped((uint32_t)phdr.vaddr, size)) return false;
 	memcpy(&params, base, size);
 	
-	params.size = BSwap32(params.size);
-	params.magic = BSwap32(params.magic);
-	params.version = BSwap32(params.version);
-	params.sdkVersion = BSwap32(params.sdkVersion);
-	params.primaryPrio = BSwap32(params.primaryPrio);
-	params.primaryStackSize = BSwap32(params.primaryStackSize);
-	params.mallocPageSize = BSwap32(params.mallocPageSize);
-	params.ppcSeg = BSwap32(params.ppcSeg);
-	params.crashDumpParamAddr = BSwap32(params.crashDumpParamAddr);
+	params.size = LcBSwap32(params.size);
+	params.magic = LcBSwap32(params.magic);
+	params.version = LcBSwap32(params.version);
+	params.sdkVersion = LcBSwap32(params.sdkVersion);
+	params.primaryPrio = LcBSwap32(params.primaryPrio);
+	params.primaryStackSize = LcBSwap32(params.primaryStackSize);
+	params.mallocPageSize = LcBSwap32(params.mallocPageSize);
+	params.ppcSeg = LcBSwap32(params.ppcSeg);
+	params.crashDumpParamAddr = LcBSwap32(params.crashDumpParamAddr);
 
 	return true;
 }
@@ -167,22 +167,22 @@ LoadPrxParams(
 
 	if (!mem.IsMapped((uint32_t)phdr.vaddr, 0x28)) return false;
 	const uint8_t* const base{ mem.base + phdr.vaddr };
-	const uint32_t size{ BSwap32(LcRead32(base)) };
+	const uint32_t size{ LcBSwap32(LcRead32(base)) };
 
 	if (size < 0x28 || !mem.IsMapped((uint32_t)phdr.vaddr, size)) return false;
 	memcpy(&params, base, size);
 
-	params.size = BSwap32(params.size);
-	params.magic = BSwap32(params.magic);
-	params.version = BSwap32(params.version);
-	params.pad0 = BSwap32(params.pad0);
-	params.libEntStart = BSwap32(params.libEntStart);
-	params.libEntEnd = BSwap32(params.libEntEnd);
-	params.libStubStart = BSwap32(params.libStubStart);
-	params.libStubEnd = BSwap32(params.libStubEnd);
-	params.ver = BSwap16(params.ver);
-	params.pad1 = BSwap16(params.pad1);
-	params.pad2 = BSwap32(params.pad2);
+	params.size = LcBSwap32(params.size);
+	params.magic = LcBSwap32(params.magic);
+	params.version = LcBSwap32(params.version);
+	params.pad0 = LcBSwap32(params.pad0);
+	params.libEntStart = LcBSwap32(params.libEntStart);
+	params.libEntEnd = LcBSwap32(params.libEntEnd);
+	params.libStubStart = LcBSwap32(params.libStubStart);
+	params.libStubEnd = LcBSwap32(params.libStubEnd);
+	params.ver = LcBSwap16(params.ver);
+	params.pad1 = LcBSwap16(params.pad1);
+	params.pad2 = LcBSwap32(params.pad2);
 
 	return true;
 }

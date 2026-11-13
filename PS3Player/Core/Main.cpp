@@ -1,5 +1,7 @@
 #include <PS3Player/Elf/Elf.h>
 
+#include <libPs3Core/Include/Instructions.h>
+
 #include <libPs3Decrypt/Include/DecryptISO.h>
 #include <libPs3Decrypt/Include/DecryptSELF.h>
 
@@ -85,7 +87,7 @@ int main() {
 	std::vector<uint8_t> elf(elfSize);
 	if (!LpsSelfToElf(keys, eboot.data(), eboot.size(), elf.data(), elf.size(), elfSize))
 		return -1;
-	
+
 	LpsReleaseSelfKeys(keys);
 
 	GuestMem      mem{};
@@ -96,7 +98,10 @@ int main() {
 		return -1;
 	}
 
-	LoadElfProgram(elf, mem, prg);
+	if (!LoadElfProgram(elf, mem, prg)) {
+		LpsReleaseDisk(disk);
+		return -1;
+	}
 
 	elf = {};
 
@@ -105,10 +110,19 @@ int main() {
 
 	SysProcPrxParam prxParams{};
 	LoadPrxParams(mem, prg, prxParams);
-	
+
 	if (!(procParams.magic == PROCPARAMS_MAGIC
 		&& prxParams.magic == PRXPARAMS_MAGIC))
 		return false;
+
+	uint32_t pc{ prg.opd.entryPc };
+
+	for (uint32_t i{ 0 }; i < 1;++i) {
+		const uint32_t raw{ mem.Read32(pc) };
+
+		Instruction inst{};
+		LcDecodeInstruction(raw, inst);
+	}
 
 	mem.Release();
 	LpsReleaseDisk(disk);

@@ -118,8 +118,8 @@ walkDir(const uint8_t* buf, uint32_t size, F cb) {
 		const uint8_t* r{ buf + pos };
 
 		DirEntry e{};
-		e.lba = Le32(r + 2);
-		e.size = Le32(r + 10);
+		e.lba = LcLe32(r + 2);
+		e.size = LcLe32(r + 10);
 		e.isDir = (r[25] & 0x02) != 0;
 
 		const uint8_t n{ r[32] };
@@ -272,12 +272,12 @@ LpsLoadDisk(
 
 	// All header fields are big-endian. A count of 0 (or an implausible one)
 	// means sector 0 is the ISO9660 system area, i.e. an already decrypted image.
-	const uint32_t count{ Be32(sector0) };
+	const uint32_t count{ LcBe32(sector0) };
 
 	if (count >= 1 && count <= 255) {
 		uint32_t e[512]{};
 		for (uint32_t j{ 0 }; j < count * 2; ++j)
-			e[j] = Be32(&sector0[8 + j * 4]);
+			e[j] = LcBe32(&sector0[8 + j * 4]);
 
 		uint32_t n{ 0 };
 		bool valid{ true };
@@ -382,8 +382,8 @@ LpsMountFileSys(
 	if (!LpsReadSectors(disk, 16, 1, pvd)) return false;
 	if (!validatePVD(pvd)) return false;
 
-	disk->rootLba = Le32(pvd + 156 + 2);
-	disk->rootSize = Le32(pvd + 156 + 10);
+	disk->rootLba = LcLe32(pvd + 156 + 2);
+	disk->rootSize = LcLe32(pvd + 156 + 10);
 	
 	return true;
 }

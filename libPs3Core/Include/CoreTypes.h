@@ -5,6 +5,11 @@
 #include <Windows.h>
 #include <immintrin.h>
 
+// libPs3Core.dll
+// The core interface on which every submodule may depend
+// Functions in this dll should be prefixed with Lc
+// Functions in other submodules should be prefixed with Lps
+
 #define CORE_API __declspec(dllexport)
 
 #if LPS3_BUILDING_DLL

@@ -167,22 +167,22 @@ bool
 parseSelf(SelfKeys keys, const uint8_t* s, size_t size, const aesProv& aes, SelfPlan& plan) {
 	// --- SCE header (big-endian)
 	if (size < 0x70) return false;
-	if (Be32(s) != 0x53434500u) return false;
-	const uint16_t keyRev{ Be16(s + 0x08) };
-	const uint16_t category{ Be16(s + 0x0A) };
-	const uint32_t metaOff{ Be32(s + 0x0C) };
-	const uint64_t headerLen{ Be64(s + 0x10) };
+	if (LcBe32(s) != 0x53434500u) return false;
+	const uint16_t keyRev{ LcBe16(s + 0x08) };
+	const uint16_t category{ LcBe16(s + 0x0A) };
+	const uint32_t metaOff{ LcBe32(s + 0x0C) };
+	const uint64_t headerLen{ LcBe64(s + 0x10) };
 	if (category != 1) return false;
 	if (headerLen > size) return false;
 
 	// --- SELF extended header at 0x20
-	const uint64_t appInfoOff{ Be64(s + 0x28) };
-	plan.elfOffset = Be64(s + 0x30);
-	plan.phdrOffset = Be64(s + 0x38);
-	plan.shdrOffset = Be64(s + 0x40);
+	const uint64_t appInfoOff{ LcBe64(s + 0x28) };
+	plan.elfOffset = LcBe64(s + 0x30);
+	plan.phdrOffset = LcBe64(s + 0x38);
+	plan.shdrOffset = LcBe64(s + 0x40);
 
 	if (!inRange(appInfoOff, 0x20, size)) return false;
-	const uint32_t selfType{ Be32(s + appInfoOff + 12) };
+	const uint32_t selfType{ LcBe32(s + appInfoOff + 12) };
 
 	// --- metadata info: 64 bytes, AES-256-CBC with the per-type/revision erk + riv
 	const uint64_t infoPos{ 0x20 + uint64_t(metaOff) };
@@ -220,8 +220,8 @@ parseSelf(SelfKeys keys, const uint8_t* s, size_t size, const aesProv& aes, Self
 	memcpy(meta.data(), s + regionPos, meta.size());
 	if (!aesCtr(aes, metaKey, metaIv, meta.data(), meta.size())) return false;
 
-	const uint32_t sectionCount{ Be32(meta.data() + 0x0C) };
-	const uint32_t keyCount{ Be32(meta.data() + 0x10) };
+	const uint32_t sectionCount{ LcBe32(meta.data() + 0x0C) };
+	const uint32_t keyCount{ LcBe32(meta.data() + 0x10) };
 	if (sectionCount > 0x1000 || keyCount > 0x1000) return false;
 	const size_t need{ 0x20 + size_t(sectionCount) * 0x30 + size_t(keyCount) * 16 };
 	if (need > meta.size()) return false;
@@ -235,12 +235,12 @@ parseSelf(SelfKeys keys, const uint8_t* s, size_t size, const aesProv& aes, Self
 	if (memcmp(eh, kElfMagic, 4) != 0 || eh[4] != 2 || eh[5] != 2)
 		return false;
 
-	plan.ePhoff = Be64(eh + 0x20);
-	plan.eShoff = Be64(eh + 0x28);
-	const uint16_t phentsize{ Be16(eh + 0x36) };
-	plan.ePhnum = Be16(eh + 0x38);
-	plan.eShentsize = Be16(eh + 0x3A);
-	plan.eShnum = Be16(eh + 0x3C);
+	plan.ePhoff = LcBe64(eh + 0x20);
+	plan.eShoff = LcBe64(eh + 0x28);
+	const uint16_t phentsize{ LcBe16(eh + 0x36) };
+	plan.ePhnum = LcBe16(eh + 0x38);
+	plan.eShentsize = LcBe16(eh + 0x3A);
+	plan.eShnum = LcBe16(eh + 0x3C);
 
 	if (phentsize != kPhdrSize) return false;
 	if (!inRange(plan.phdrOffset, uint64_t(plan.ePhnum) * kPhdrSize, size)) return false;
@@ -251,8 +251,8 @@ parseSelf(SelfKeys keys, const uint8_t* s, size_t size, const aesProv& aes, Self
 	for (uint16_t i{ 0 }; i < plan.ePhnum; ++i) {
 		const uint8_t* ph{ s + plan.phdrOffset + size_t(i) * kPhdrSize };
 		PhdrInfo info{};
-		info.offset = Be64(ph + 0x08);          // p_offset
-		info.filesz = Be64(ph + 0x20);          // p_filesz
+		info.offset = LcBe64(ph + 0x08);          // p_offset
+		info.filesz = LcBe64(ph + 0x20);          // p_filesz
 		plan.phdrs.push_back(info);
 	}
 
@@ -271,15 +271,15 @@ parseSelf(SelfKeys keys, const uint8_t* s, size_t size, const aesProv& aes, Self
 	for (uint32_t i{ 0 }; i < sectionCount; ++i) {
 		const uint8_t* p{ meta.data() + 0x20 + size_t(i) * 0x30 };
 		SectionHdr h{};
-		h.offset = Be64(p + 0);
-		h.size = Be64(p + 8);
-		h.type = Be32(p + 16);
-		h.index = Be32(p + 20);
+		h.offset = LcBe64(p + 0);
+		h.size = LcBe64(p + 8);
+		h.type = LcBe32(p + 16);
+		h.index = LcBe32(p + 20);
 		// p + 24: hashed, p + 28: sha1 index (unused, we skip hash checks)
-		h.encrypted = Be32(p + 32);
-		h.keyIndex = Be32(p + 36);
-		h.ivIndex = Be32(p + 40);
-		h.compressed = Be32(p + 44);
+		h.encrypted = LcBe32(p + 32);
+		h.keyIndex = LcBe32(p + 36);
+		h.ivIndex = LcBe32(p + 40);
+		h.compressed = LcBe32(p + 44);
 		plan.sections.push_back(h);
 
 		if (h.type != kSectTypePhdr) continue;       // only program header data is rebuilt

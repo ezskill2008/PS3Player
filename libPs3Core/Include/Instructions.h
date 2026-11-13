@@ -24,47 +24,32 @@ enum class InstForm {
 	MD,
 	MDS,
 };
-//
-//enum class InstTypePrimary {
-//	IllRes = 0x00,
-//	None1 = 0x01,
-//	Tdi = 0x02,
-//	Twi = 0x03,
-//	None2 = 0x04,
-//	None3 = 0x05,
-//	None4 = 0x06,
-//	Mulli = 0x07,
-//	Subfic = 0x08,
-//	Dozi = 0x09,
-//	Cmpli = 0x0A,
-//	Cmpi = 0x0B,
-//	Addic = 0x0C,
-//	Addicd = 0x0D,
-//	Addi = 0x0E,
-//	Addis = 0x0F,
-//	Bc = 0x10,
-//	Sc = 0x11,
-//	B = 0x12,
-//	CrOps = 0x13,//No real mnemonic
-//	Rlwimi = 0x14,
-//	Rlwinm = 0x15,
-//	Rlmi = 0x15,
-//	Rlwnm = 0x16,
-//	Ori = 0x17,
-//};
 
 enum class InstOp {
 	OpNone = 0,
+	Tdi,
+	Twi,
+	Mulli,
+	Subfic,
+	Dozi,
+	Cmpli,
+	Cmpi,
+	Addic,
+	Addicd,
+	Addi,
+	Addis,
 };
 
 struct Instruction {
 	uint32_t	opcode{};
 
+	uint16_t ui{};
+	int16_t si{};
 	uint8_t rt{ 0 }, ra{ 0 }, rb{ 0 }, rs{ 0 };
 	bool aa{ false }, lk{ false };
 };
 
-bool LpsDecodeInstruction(
+CORE_API bool LcDecodeInstruction(
 	uint32_t raw, 
 	Instruction& inst);
 

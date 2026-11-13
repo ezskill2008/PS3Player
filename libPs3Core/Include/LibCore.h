@@ -12,17 +12,17 @@ CORE_API void LcLogError(
 	size_t line);
 
 inline uint16_t
-BSwap16(uint16_t b) {
+LcBSwap16(uint16_t b) {
 	return _byteswap_ushort(b);
 }
 
 inline uint32_t
-BSwap32(uint32_t b) {
+LcBSwap32(uint32_t b) {
 	return _byteswap_ulong(b);
 }
 
 inline uint64_t
-BSwap64(uint64_t b) {
+LcBSwap64(uint64_t b) {
 	return _byteswap_uint64(b);
 }
 
@@ -51,46 +51,46 @@ inline uint16_t
 LcRead16BE(const uint8_t* const stream) {
 	uint16_t value{ 0 };
 	memcpy(&value, stream, sizeof(uint16_t));
-	return BSwap16(value);
+	return LcBSwap16(value);
 }
 
 inline uint32_t
 LcRead32BE(const uint8_t* const stream) {
 	uint32_t value{ 0 };
 	memcpy(&value, stream, sizeof(uint32_t));
-	return BSwap32(value);
+	return LcBSwap32(value);
 }
 
 inline uint64_t
 LcRead64BE(const uint8_t* const stream) {
 	uint64_t value{ 0 };
 	memcpy(&value, stream, sizeof(uint64_t));
-	return BSwap64(value);
+	return LcBSwap64(value);
 }
 
 inline uint16_t
-Be16(const uint8_t* const p) {
+LcBe16(const uint8_t* const p) {
 	return uint16_t((p[0] << 8) | p[1]);
 }
 
 inline uint32_t
-Be32(const uint8_t* const p) {
+LcBe32(const uint8_t* const p) {
 	return (uint32_t{ p[0] } << 24) | (uint32_t{ p[1] } << 16) |
 		(uint32_t{ p[2] } << 8) | uint32_t{ p[3] };
 }
 
 inline uint64_t
-Be64(const uint8_t* const p) {
-	return (uint64_t{ Be32(p) } << 32) | Be32(p + 4);
+LcBe64(const uint8_t* const p) {
+	return (uint64_t{ LcBe32(p) } << 32) | LcBe32(p + 4);
 }
 
 inline uint16_t
-Le16(const uint8_t* const p) {
+LcLe16(const uint8_t* const p) {
 	return uint16_t(p[0]) | (uint16_t(p[1]) << 8);
 }
 
 inline uint32_t
-Le32(const uint8_t* const p) {
+LcLe32(const uint8_t* const p) {
 	return uint32_t(p[0]) | (uint32_t(p[1]) << 8) |
 		(uint32_t(p[2]) << 16) | (uint32_t(p[3]) << 24);
 }
