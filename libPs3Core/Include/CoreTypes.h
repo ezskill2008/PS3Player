@@ -5,6 +5,8 @@
 #include <Windows.h>
 #include <immintrin.h>
 
+#include <type_traits>
+
 // libPs3Core.dll
 // The core interface on which every submodule may depend
 // Functions in this dll should be prefixed with Lc

@@ -1,6 +1,7 @@
 #include <PS3Player/Elf/Elf.h>
 
-#include <libPs3Core/Include/Instructions.h>
+#include <libPs3Core/Include/BitTypes.h>
+#include <libPs3Core/Include/PPUInstructions.h>
 
 #include <libPs3Decrypt/Include/DecryptISO.h>
 #include <libPs3Decrypt/Include/DecryptSELF.h>
@@ -35,7 +36,6 @@ PrintTree(IsoDisk disk, const std::string& dir) {
 int main() {
 #if _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(152);
 #endif
 	CryptKey isoKey{};
 	IsoDisk disk{};
@@ -54,12 +54,12 @@ int main() {
 		return -1;
 #else
 	if (!LpsReadKey(
-		"D:\\Games\\Minecraft - PlayStation 3 Edition (Europe).key",
+		"E:\\Games\\Minecraft - PlayStation 3 Edition (Europe).key",
 		isoKey))
 		return -1;
 
 	if (!LpsLoadDisk(
-		"D:\\Games\\Minecraft - PlayStation 3 Edition (Europe).iso",
+		"E:\\Games\\Minecraft - PlayStation 3 Edition (Europe).iso",
 		disk))
 		return -1;
 #endif
@@ -96,7 +96,7 @@ int main() {
 	if (!LpsLoadSelfKeys("D:\\code\\PS3Content\\keys.txt", keys))
 		return -1;
 #else
-	if (!LpsLoadSelfKeys("D:\\keys.txt", keys))
+	if (!LpsLoadSelfKeys("E:\\keys.txt", keys))
 		return -1;
 #endif
 
@@ -139,11 +139,13 @@ int main() {
 
 	uint32_t pc{ prg.opd.entryPc };
 
-	for (uint32_t i{ 0 }; i < 10;++i) {
+	for (uint32_t i{ 0 }; i < 100;++i) {
 		const uint32_t raw{ mem.Read32(pc) };
 
-		Instruction inst{};
-		LcDecodeInstruction(raw, inst);
+		InstField inst{ raw };
+		InstData data{};
+
+		LcDecodeInstruction(inst, data);
 
 		char str[LC_INSTRUCTION_LENGTH]{};
 		LcGetInstructionString(inst, str);
