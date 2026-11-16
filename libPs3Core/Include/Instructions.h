@@ -40,6 +40,13 @@ enum class InstOp {
 	Addicd,
 	Addi,
 	Addis,
+	Bc,
+	Sc,
+	B,
+	Ori,
+	Oris,
+	Xori,
+	Xoris,
 };
 
 enum class InstBits : uint64_t {
@@ -104,6 +111,7 @@ enum class OpFmt {
 	RtRaSi,
 	RtRaUi,
 	RtRsUi,
+	RsRaUi,
 	RtDRa,
 	RsDRa,
 	Target,

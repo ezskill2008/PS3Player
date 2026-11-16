@@ -35,6 +35,16 @@ constexpr static primaryEntry gPrimary[64]{
 	{ { InstOp::OpNone, InstForm::Undefined } },		//0x0D 13
 	{ { InstOp::Addi, InstForm::D, OpFmt::RtRaSi } },	//0x0E 14
 	{ { InstOp::OpNone, InstForm::Undefined } },		//0x0F 15
+	{ { InstOp::OpNone, InstForm::Undefined } },		//0x10 16
+	{ { InstOp::OpNone, InstForm::Undefined } },		//0x11 17
+	{ { InstOp::OpNone, InstForm::Undefined } },		//0x12 18
+	{ { InstOp::OpNone, InstForm::Undefined } },		//0x13 19
+	{ { InstOp::OpNone, InstForm::Undefined } },		//0x14 20
+	{ { InstOp::OpNone, InstForm::Undefined } },		//0x15 21
+	{ { InstOp::OpNone, InstForm::Undefined } },		//0x16 22
+	{ { InstOp::OpNone, InstForm::Undefined } },		//0x17 23
+	{ { InstOp::OpNone, InstForm::Undefined } },		//0x18 24
+	{ { InstOp::Oris, InstForm::D, OpFmt::RsRaUi } },	//0x19 25
 };
 
 //MUST match OpFmt
@@ -61,6 +71,13 @@ constexpr const char* gOpInstStrs[]{
 	"ADDICD",
 	"ADDI",
 	"ADDIS",
+	"BC",
+	"SC",
+	"B",
+	"ORI",
+	"ORIS",
+	"XORI",
+	"XORIS",
 };
 
 void
