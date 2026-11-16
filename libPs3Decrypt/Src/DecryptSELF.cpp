@@ -194,6 +194,7 @@ parseSelf(SelfKeys keys, const uint8_t* s, size_t size, const aesProv& aes, Self
 	bool    rowSeen{ false };
 
 	AcquireSRWLockShared(&keys->keyLock);
+
 	for (const SelfKeyEntry& e : keys->keys) {
 		if (e.selfType != selfType || e.keyRevision != keyRev) continue;
 		rowSeen = true;
@@ -209,6 +210,7 @@ parseSelf(SelfKeys keys, const uint8_t* s, size_t size, const aesProv& aes, Self
 			break;
 		}
 	}
+
 	ReleaseSRWLockShared(&keys->keyLock);
 	if (!keyFound)
 		return false;

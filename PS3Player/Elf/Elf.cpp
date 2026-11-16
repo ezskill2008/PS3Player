@@ -169,8 +169,10 @@ LoadPrxParams(
 	const uint8_t* const base{ mem.base + phdr.vaddr };
 	const uint32_t size{ LcBSwap32(LcRead32(base)) };
 
+	//TODO: Real prx params can be of size 64, find out what these extra 24 bytes add
+	//For now just always read 40 bytes
 	if (size < 0x28 || !mem.IsMapped((uint32_t)phdr.vaddr, size)) return false;
-	memcpy(&params, base, size);
+	memcpy(&params, base, sizeof(SysProcPrxParam));
 
 	params.size = LcBSwap32(params.size);
 	params.magic = LcBSwap32(params.magic);

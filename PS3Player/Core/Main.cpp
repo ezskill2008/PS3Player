@@ -39,8 +39,10 @@ int main() {
 #endif
 	CryptKey isoKey{};
 	IsoDisk disk{};
-	
-#if 0
+
+#define COMPUTER 0
+
+#if COMPUTER
 	if (!LpsReadKey(
 		"D:\\code\\PS3Content\\Minerva_Myrient\\Redump\\Sony - PlayStation 3 - Disc Keys\\Brain Challenge (Europe) (En,Fr,De,Es,It,Nl).key",
 		isoKey))
@@ -51,8 +53,13 @@ int main() {
 		disk))
 		return -1;
 #else
+	if (!LpsReadKey(
+		"D:\\Games\\Minecraft - PlayStation 3 Edition (Europe).key",
+		isoKey))
+		return -1;
+
 	if (!LpsLoadDisk(
-		"C:\\Code\\PS3Content\\Minecraft [BLUS31426].iso",
+		"D:\\Games\\Minecraft - PlayStation 3 Edition (Europe).iso",
 		disk))
 		return -1;
 #endif
@@ -85,8 +92,13 @@ int main() {
 
 	SelfKeys keys{};
 
+#if COMPUTER
 	if (!LpsLoadSelfKeys("D:\\code\\PS3Content\\keys.txt", keys))
 		return -1;
+#else
+	if (!LpsLoadSelfKeys("D:\\keys.txt", keys))
+		return -1;
+#endif
 
 	size_t elfSize{ 0 };
 	if (!LpsSelfToElf(keys, eboot.data(), eboot.size(), nullptr, 0, elfSize))
