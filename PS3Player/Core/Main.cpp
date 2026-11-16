@@ -115,13 +115,21 @@ int main() {
 		&& prxParams.magic == PRXPARAMS_MAGIC))
 		return false;
 
+	printf("\nDissAsm:\n");
+
 	uint32_t pc{ prg.opd.entryPc };
 
-	for (uint32_t i{ 0 }; i < 1;++i) {
+	for (uint32_t i{ 0 }; i < 10;++i) {
 		const uint32_t raw{ mem.Read32(pc) };
 
 		Instruction inst{};
 		LcDecodeInstruction(raw, inst);
+
+		char str[LC_INSTRUCTION_LENGTH]{};
+		LcGetInstructionString(inst, str);
+		printf("%#010x %s\n", pc, str);
+
+		pc += sizeof(uint32_t);
 	}
 
 	mem.Release();

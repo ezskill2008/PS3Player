@@ -96,9 +96,14 @@ LcLe32(const uint8_t* const p) {
 }
 
 inline uint64_t
-Le64(const uint8_t* const p) {
+LcLe64(const uint8_t* const p) {
 	return uint64_t(p[0]) | (uint64_t(p[1]) << 8) |
 		(uint64_t(p[2]) << 16) | (uint64_t(p[3]) << 24) |
 		(uint64_t(p[4]) << 32) | (uint64_t(p[5]) << 40) |
 		(uint64_t(p[6]) << 48) | (uint64_t(p[7]) << 56);
+}
+
+constexpr uint64_t
+LcBit(unsigned n) { 
+	return 1ULL << n; 
 }

@@ -4,7 +4,9 @@
 //The source:
 //https://math-atlas.sourceforge.net/devel/assembly/ppc_isa.pdf
 //Was used for the following things:
-//InstForm, InstFieldBits (including bit descriptions)
+//InstFieldBits (including bit descriptions)
+
+#define LC_INSTRUCTION_LENGTH 64
 
 enum class InstForm {
 	Undefined = 0,
@@ -40,8 +42,77 @@ enum class InstOp {
 	Addis,
 };
 
+enum class InstBits : uint64_t {
+	None = 0,
+	AA = LcBit(0),
+	BA = LcBit(1),
+	BB = LcBit(2),
+	BD = LcBit(3),
+	BF = LcBit(4),
+	BFA = LcBit(5),
+	BH = LcBit(6),
+	BI = LcBit(7),
+	BO = LcBit(8),
+	BT = LcBit(9),
+	D = LcBit(10),
+	DS = LcBit(11),
+	FLM = LcBit(12),
+	RA = LcBit(13),
+	RB = LcBit(14),
+	RC = LcBit(15),
+	RS = LcBit(16),
+	RT = LcBit(17),
+	FXM = LcBit(18),
+	L10 = LcBit(19),
+	L15 = LcBit(20),
+	L = LcBit(21),
+	LEV = LcBit(22),
+	LI = LcBit(23),
+	LK = LcBit(24),
+	MBM = LcBit(25),
+	MEM = LcBit(26),
+	MB = LcBit(27),
+	ME = LcBit(28),
+	NB = LcBit(29),
+	OE = LcBit(30),
+	Rc = LcBit(31),
+	SH = LcBit(32),
+	SI = LcBit(33),
+	SPR = LcBit(34),
+	SR = LcBit(35),
+	TBR = LcBit(36),
+	TH = LcBit(37),
+	TO = LcBit(38),
+	U = LcBit(39),
+	UI = LcBit(40),
+	Rec = LcBit(41),
+};
+
+constexpr InstBits operator|(InstBits a, InstBits b) {
+	return static_cast<InstBits>(static_cast<uint64_t>(a) | static_cast<uint64_t>(b));
+}
+
+constexpr InstBits operator&(InstBits a, InstBits b) {
+	return static_cast<InstBits>(static_cast<uint64_t>(a) & static_cast<uint64_t>(b));
+}
+
+constexpr InstBits& operator|=(InstBits& a, InstBits b) { return a = a | b; }
+constexpr bool Has(InstBits set, InstBits f) { return (set & f) != InstBits::None; }
+
+enum class OpFmt {
+	None = 0,
+	RtRaSi,
+	RtRaUi,
+	RtRsUi,
+	RtDRa,
+	RsDRa,
+	Target,
+};
+
 struct Instruction {
 	uint32_t	opcode{};
+	InstOp		instOp{};
+	OpFmt		fmt{};
 
 	uint16_t ui{};
 	int16_t si{};
@@ -52,6 +123,10 @@ struct Instruction {
 CORE_API bool LcDecodeInstruction(
 	uint32_t raw, 
 	Instruction& inst);
+
+CORE_API bool LcGetInstructionString(
+	const Instruction& inst,
+	char str[LC_INSTRUCTION_LENGTH]);
 
 namespace InstFieldBits {
 constexpr inline uint32_t GetBits(uint32_t data, int first, int last) {
