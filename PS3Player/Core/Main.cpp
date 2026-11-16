@@ -38,16 +38,24 @@ int main() {
 	//_CrtSetBreakAlloc(152);
 #endif
 	CryptKey isoKey{};
+	IsoDisk disk{};
+	
+#if 0
 	if (!LpsReadKey(
 		"D:\\code\\PS3Content\\Minerva_Myrient\\Redump\\Sony - PlayStation 3 - Disc Keys\\Brain Challenge (Europe) (En,Fr,De,Es,It,Nl).key",
 		isoKey))
 		return -1;
 
-	IsoDisk disk{};
 	if (!LpsLoadDisk(
 		"D:\\code\\PS3Content\\Minerva_Myrient\\Redump\\Sony - PlayStation 3\\Brain Challenge (Europe) (En,Fr,De,Es,It,Nl).iso",
 		disk))
-		return -1;;
+		return -1;
+#else
+	if (!LpsLoadDisk(
+		"C:\\Code\\PS3Content\\Minecraft [BLUS31426].iso",
+		disk))
+		return -1;
+#endif
 
 	if (!(LpsSetDiskKey(disk, isoKey)
 		&& LpsMountFileSys(disk))) {

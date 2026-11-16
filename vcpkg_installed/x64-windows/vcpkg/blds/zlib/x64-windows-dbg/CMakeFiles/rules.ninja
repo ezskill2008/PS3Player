@@ -32,7 +32,7 @@ rule C_COMPILER__zlib_unscanned_Debug
 rule RC_COMPILER__zlib_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
-  command = C:/Users/Keven/AppData/Local/vcpkg/DOWNLO~1/tools/CMAKE-~1.0-W/CMAKE-~1.0-W/bin/cmcldeps.exe RC $in $DEP_FILE $out "Note: including file: " "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe" ${LAUNCHER}${CODE_CHECK}"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe" $DEFINES $INCLUDES $FLAGS /fo $out $in
+  command = C:/Users/keven/AppData/Local/vcpkg/DOWNLO~1/tools/CMAKE-~1.0-W/CMAKE-~1.0-W/bin/cmcldeps.exe RC $in $DEP_FILE $out "Note: including file: " "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe" ${LAUNCHER}${CODE_CHECK}"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe" $DEFINES $INCLUDES $FLAGS /fo $out $in
   description = Building RC object $out
 
 
@@ -40,7 +40,7 @@ rule RC_COMPILER__zlib_unscanned_Debug
 # Rule for linking C shared library.
 
 rule C_SHARED_LIBRARY_LINKER__zlib_Debug
-  command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && C:\Users\Keven\AppData\Local\vcpkg\downloads\tools\cmake-4.4.0-windows\cmake-4.4.0-windows-x86_64\bin\cmake.exe -E vs_link_dll --msvc-ver=1951 --intdir=$OBJECT_DIR --rc="C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe" --mt="C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\mt.exe" --manifests $MANIFESTS -- "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\bin\Hostx64\x64\link.exe"  $in  /out:$TARGET_FILE /implib:$TARGET_IMPLIB /pdb:$TARGET_PDB /dll /version:1.3 $LINK_FLAGS $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+  command = C:\windows\system32\cmd.exe /C "$PRE_LINK && C:\Users\keven\AppData\Local\vcpkg\downloads\tools\cmake-4.4.0-windows\cmake-4.4.0-windows-x86_64\bin\cmake.exe -E vs_link_dll --msvc-ver=1951 --intdir=$OBJECT_DIR --rc="C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe" --mt="C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\mt.exe" --manifests $MANIFESTS -- "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\bin\Hostx64\x64\link.exe"  $in  /out:$TARGET_FILE /implib:$TARGET_IMPLIB /pdb:$TARGET_PDB /dll /version:1.3 $LINK_FLAGS $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking C shared library $TARGET_FILE
   restat = $RESTAT
 
@@ -57,7 +57,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = C:\Users\Keven\AppData\Local\vcpkg\downloads\tools\cmake-4.4.0-windows\cmake-4.4.0-windows-x86_64\bin\cmake.exe --regenerate-during-build -SD:\code\PS3Player\vcpkg_installed\x64-windows\vcpkg\blds\zlib\src\v1.3.2-c19a0bfd23.clean -BD:\code\PS3Player\vcpkg_installed\x64-windows\vcpkg\blds\zlib\x64-windows-dbg
+  command = C:\Users\keven\AppData\Local\vcpkg\downloads\tools\cmake-4.4.0-windows\cmake-4.4.0-windows-x86_64\bin\cmake.exe --regenerate-during-build -SC:\Code\PS3Player\vcpkg_installed\x64-windows\vcpkg\blds\zlib\src\v1.3.2-c19a0bfd23.clean -BC:\Code\PS3Player\vcpkg_installed\x64-windows\vcpkg\blds\zlib\x64-windows-dbg
   description = Re-running CMake...
   generator = 1
 

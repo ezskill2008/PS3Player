@@ -1,8 +1,8 @@
-# Install script for directory: D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/src/v1.3.2-c19a0bfd23.clean/contrib
+# Install script for directory: C:/Code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/src/v1.3.2-c19a0bfd23.clean/contrib
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/pkgs/zlib_x64-windows/debug")
+  set(CMAKE_INSTALL_PREFIX "C:/Code/PS3Player/vcpkg_installed/x64-windows/vcpkg/pkgs/zlib_x64-windows/debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -35,6 +35,6 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-dbg/contrib/install_local_manifest.txt"
+  file(WRITE "C:/Code/PS3Player/vcpkg_installed/x64-windows/vcpkg/blds/zlib/x64-windows-dbg/contrib/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

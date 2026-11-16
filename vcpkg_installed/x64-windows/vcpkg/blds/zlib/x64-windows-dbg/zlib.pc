@@ -1,5 +1,5 @@
-prefix=D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/pkgs/zlib_x64-windows/debug
-exec_prefix=D:/code/PS3Player/vcpkg_installed/x64-windows/vcpkg/pkgs/zlib_x64-windows/debug
+prefix=C:/Code/PS3Player/vcpkg_installed/x64-windows/vcpkg/pkgs/zlib_x64-windows/debug
+exec_prefix=C:/Code/PS3Player/vcpkg_installed/x64-windows/vcpkg/pkgs/zlib_x64-windows/debug
 libdir=${exec_prefix}/lib
 sharedlibdir=${exec_prefix}/lib
 includedir=${exec_prefix}/include
