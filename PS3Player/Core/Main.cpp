@@ -1,4 +1,5 @@
 #include <PS3Player/Elf/Elf.h>
+#include <PS3Player/DissAsm/DissAsm.h>
 
 #include <libPs3Core/Include/BitTypes.h>
 #include <libPs3Core/Include/PPUInstructions.h>
@@ -135,24 +136,7 @@ int main() {
 		&& prxParams.magic == PRXPARAMS_MAGIC))
 		return false;
 
-	printf("\nDissAsm:\n");
-
-	uint32_t pc{ prg.opd.entryPc };
-
-	for (uint32_t i{ 0 }; i < 100;++i) {
-		const uint32_t raw{ mem.Read32(pc) };
-
-		InstField inst{ raw };
-		InstData data{};
-
-		LcDecodeInstruction(inst, data);
-
-		char str[LC_INSTRUCTION_LENGTH]{};
-		LcGetInstructionString(inst, str);
-		printf("%#010x %s\n", pc, str);
-
-		pc += sizeof(uint32_t);
-	}
+	OutputDissAssemblyToStdOut(prg, mem);
 
 	mem.Release();
 	LpsReleaseDisk(disk);

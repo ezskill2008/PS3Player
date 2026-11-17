@@ -1,15 +1,32 @@
 #include <libPs3Core/Include/PPUInstructions.h>
 
-#include <string>
-#include <sstream>
-#include <format>
-
-typedef const InstData& (*selectFn)(uint32_t raw);
+typedef const InstData& (*selectFn)(const InstField&);
 
 struct primaryEntry {
 	InstData	e{};
 	selectFn	fn{ nullptr };
 };
+
+constexpr static InstData gOpCode12[] {
+	{ InstMnemonic::B, { InstOperand::LI } },	//b target_addr (AA=0 LK=0)
+	{ InstMnemonic::Ba, { InstOperand::LI } },	//ba target_addr (AA=1 LK=0)
+	{ InstMnemonic::Bl, { InstOperand::LI } },	//bl target_addr (AA=0 LK=1)
+	{ InstMnemonic::Bla, { InstOperand::LI } },	//bla target_addr (AA=1 LK=1)
+};
+
+const InstData& selectOpCode12(const InstField& field) {
+	uint32_t index{ static_cast<uint32_t>(field.aa) & (static_cast<uint32_t>(field.lk) << 1) };
+	return gOpCode12[index];
+};
+
+constexpr static InstData gOpCode3E []{
+	{ InstMnemonic::Std, { InstOperand::RS, InstOperand::RA0, InstOperand::DS } },	//std RS,DS(RA
+	{ InstMnemonic::Stdu, { InstOperand::RS, InstOperand::RA0, InstOperand::DS } },	//stdu RS,DS(RA)
+};
+
+const InstData& selectOpCode3E(const InstField& field) {
+	return gOpCode3E[field.xoDs];
+}
 
 constexpr static primaryEntry gPrimary[64]{
 	{ { InstMnemonic::None } },																//0x00  0
@@ -19,120 +36,64 @@ constexpr static primaryEntry gPrimary[64]{
 	{ { InstMnemonic::None } },																//0x04	4
 	{ { InstMnemonic::None } },																//0x05	5
 	{ { InstMnemonic::None } },																//0x06	6
-	{ { InstMnemonic::None } },																//0x07	7
-	{ { InstMnemonic::None } },																//0x08	8
-	{ { InstMnemonic::None } },																//0x09	9
-	{ { InstMnemonic::None } },																//0x0A 10
-	{ { InstMnemonic::None } },																//0x0B 11
-	{ { InstMnemonic::None } },																//0x0C 12
-	{ { InstMnemonic::None } },																//0x0D 13
-	{ { InstMnemonic::Addi, { InstOperand::RD, InstOperand::RA, InstOperand::SIMM } } },	//0x0E 14
-	{ { InstMnemonic::None } },																//0x0F 15
-	{ { InstMnemonic::None } },																//0x10 16
-	{ { InstMnemonic::None } },																//0x11 17
-	{ { InstMnemonic::None } },																//0x12 18
+	{ { InstMnemonic::Mulli } },															//0x07	7
+	{ { InstMnemonic::Subfic } },															//0x08	8
+	{ { InstMnemonic::Dozi } },																//0x09	9
+	{ { InstMnemonic::Cmpli } },															//0x0A 10
+	{ { InstMnemonic::Cmpi } },																//0x0B 11
+	{ { InstMnemonic::Addic } },															//0x0C 12
+	{ { InstMnemonic::Addicd } },															//0x0D 13
+	{ { InstMnemonic::Addi, { InstOperand::RD, InstOperand::RA, InstOperand::SIMM } } },	//0x0E 14	addi RT,RA,SI
+	{ { InstMnemonic::Addis } },															//0x0F 15	addis RT,RA,SI
+	{ { InstMnemonic::Bc } },																//0x10 16
+	{ { InstMnemonic::Sc } },																//0x11 17
+	{ { InstMnemonic::B }, selectOpCode12 },												//0x12 18
 	{ { InstMnemonic::None } },																//0x13 19
-	{ { InstMnemonic::None } },																//0x14 20
-	{ { InstMnemonic::None } },																//0x15 21
-	{ { InstMnemonic::None } },																//0x16 22
-	{ { InstMnemonic::None } },																//0x17 23
+	{ { InstMnemonic::Rlwimi } },															//0x14 20
+	{ { InstMnemonic::Rlwinm } },															//0x15 21
+	{ { InstMnemonic::Rlmi } },																//0x16 22
+	{ { InstMnemonic::Rlwnm } },															//0x17 23
 	{ { InstMnemonic::Ori, { InstOperand::RS, InstOperand::RA, InstOperand::UIMM } } },		//0x18 24
 	{ { InstMnemonic::Oris, { InstOperand::RS, InstOperand::RA, InstOperand::UIMM } } },	//0x19 25
-	{ { InstMnemonic::None } },																//0x1A 26
-	{ { InstMnemonic::None } },																//0x1B 27
-	{ { InstMnemonic::None } },																//0x1C 28
-	{ { InstMnemonic::None } },																//0x1D 29
+	{ { InstMnemonic::Xori } },																//0x1A 26
+	{ { InstMnemonic::Xoris } },															//0x1B 27
+	{ { InstMnemonic::Andi } },																//0x1C 28
+	{ { InstMnemonic::Andis } },															//0x1D 29
 	{ { InstMnemonic::None } },																//0x1E 30
 	{ { InstMnemonic::None } },																//0x1F 31
 	{ { InstMnemonic::Lwz, { InstOperand::RD, InstOperand::SIMM, InstOperand::RA0 } } },	//0x20 32
+	{ { InstMnemonic::Lwzu } },																//0x21 33
+	{ { InstMnemonic::Lbz } },																//0x22 34
+	{ { InstMnemonic::Lbzu } },																//0x23 35
+	{ { InstMnemonic::Stw } },																//0x24 36
+	{ { InstMnemonic::Stwu } },																//0x25 37
+	{ { InstMnemonic::Stb } },																//0x26 38
+	{ { InstMnemonic::Stbu } },																//0x27 39
+	{ { InstMnemonic::Lhz } },																//0x28 40
+	{ { InstMnemonic::Lhzu } },																//0x29 41
+	{ { InstMnemonic::Lha } },																//0x2A 42
+	{ { InstMnemonic::Lhau } },																//0x2B 43
+	{ { InstMnemonic::Sth } },																//0x2C 44
+	{ { InstMnemonic::Sthu } },																//0x2D 45
+	{ { InstMnemonic::Lmw } },																//0x2E 46
+	{ { InstMnemonic::Stmw } },																//0x2F 47
+	{ { InstMnemonic::Lfs } },																//0x30 48
+	{ { InstMnemonic::Lfsu } },																//0x31 49
+	{ { InstMnemonic::Lfd } },																//0x32 50
+	{ { InstMnemonic::Lfdu } },																//0x33 51
+	{ { InstMnemonic::Stfs } },																//0x34 52
+	{ { InstMnemonic::Stfsu } },															//0x35 53
+	{ { InstMnemonic::Stfd } },																//0x36 54
+	{ { InstMnemonic::Stfdu } },															//0x37 55
+	{ { InstMnemonic::None } },																//0x38 56
+	{ { InstMnemonic::None } },																//0x39 57
+	{ { InstMnemonic::None } },																//0x3A 58
+	{ { InstMnemonic::None } },																//0x3B 59
+	{ { InstMnemonic::None } },																//0x3C 60
+	{ { InstMnemonic::None } },																//0x3D 61
+	{ { InstMnemonic::None }, selectOpCode3E },												//0x3E 62
+	{ { InstMnemonic::None } },																//0x3F 63
 };
-
-constexpr const char* gMnemonicStrs[]{
-	"UNKNOWN",
-	"TDI",
-	"TWI",
-	"MULLI",
-	"SUBFIC",
-	"DOZI",
-	"CMPLI",
-	"CMPI",
-	"ADDIC",
-	"ADDICD",
-	"ADDI",
-	"ADDIS",
-	"BC",
-	"SC",
-	"B",
-	"ORI",
-	"ORIS",
-	"XORI",
-	"XORIS",
-	"ANDI",
-	"ANDIS",
-	"LWZ",
-};
-
-static std::string
-reg(char prefix, uint32_t n) {
-	return std::string{ prefix } + std::to_string(n);
-}
-
-static std::string
-num(int64_t v) {
-	return std::to_string(v);
-}
-
-static std::string
-formatOperand(InstOperand op, const InstField& f) {
-	switch (op) {
-	case InstOperand::RD:   return reg('R', f.rd.Get());
-	case InstOperand::RS:   return reg('R', f.rs.Get());
-	case InstOperand::RA:   return reg('R', f.ra.Get());
-	case InstOperand::RA0:  return f.ra.Get() == 0 ? std::string{ "0" } : reg('R', f.ra.Get());
-	case InstOperand::RB:   return reg('R', f.rb.Get());
-	case InstOperand::FRD:  return reg('F', f.frd.Get());
-	case InstOperand::FRS:  return reg('F', f.frs.Get());
-	case InstOperand::FRA:  return reg('F', f.fra.Get());
-	case InstOperand::FRB:  return reg('F', f.frb.Get());
-	case InstOperand::FRC:  return reg('F', f.frc.Get());
-	case InstOperand::VD:   return reg('V', f.vd.Get());
-	case InstOperand::VS:   return reg('V', f.vs.Get());
-	case InstOperand::VA:   return reg('V', f.va.Get());
-	case InstOperand::VB:   return reg('V', f.vb.Get());
-	case InstOperand::VC:   return reg('V', f.vc.Get());
-	case InstOperand::SIMM:  return num(f.simm.Get());
-	case InstOperand::UIMM:  return num(f.uimm.Get());
-	case InstOperand::DS:    return num(f.DispDS());
-	case InstOperand::VSIMM: return num(f.vsimm.Get());
-	case InstOperand::VUIMM: return num(f.vuimm.Get());
-	case InstOperand::VSH:   return num(f.vsh.Get());
-	case InstOperand::NB:    return num(f.nb.Get());
-	case InstOperand::SH:    return num(f.sh.Get());
-	case InstOperand::SH64:  return num(f.Sh64());
-	case InstOperand::MB:    return num(f.mb.Get());
-	case InstOperand::ME:    return num(f.me.Get());
-	case InstOperand::MB64:  return num(f.Mb64());
-	case InstOperand::ME64:  return num(f.Me64());
-	case InstOperand::BO:    return num(f.bo.Get());
-	case InstOperand::BI:    return num(f.bi.Get());
-	case InstOperand::BH:    return num(f.bh.Get());
-	case InstOperand::BD:    return num(f.DispBD());
-	case InstOperand::LI:    return num(f.DispLI());
-	case InstOperand::CRFD:  return "CR" + num(f.crfd.Get());
-	case InstOperand::CRFS:  return "CR" + num(f.crfs.Get());
-	case InstOperand::CRBD:  return num(f.crbd.Get());
-	case InstOperand::CRBA:  return num(f.crba.Get());
-	case InstOperand::CRBB:  return num(f.crbb.Get());
-	case InstOperand::CRM:   return num(f.crm.Get());
-	case InstOperand::FM:    return num(f.fm.Get());
-	case InstOperand::L:     return num(f.l.Get());
-	case InstOperand::TO:    return num(f.to.Get());
-	case InstOperand::SPR:   return num(f.Spr());
-	case InstOperand::SR:    return num(f.sr.Get());
-	case InstOperand::LEV:   return num(f.lev.Get());
-	default:                 return "?";
-	}
-}
 
 bool
 LcDecodeInstruction(
@@ -141,53 +102,11 @@ LcDecodeInstruction(
 	const primaryEntry& primary{ gPrimary[instField.opcd] };
 
 	if (primary.fn) {
-		//Get secondary form
+		inst = primary.fn(instField);
 	}
 	else {
 		inst = primary.e;
 	}
-
-	return true;
-}
-
-bool
-LcGetInstructionString(
-	const InstField& inst,
-	char str[LC_INSTRUCTION_LENGTH]) {
-	InstData data{};
-	std::string out{};
-
-	if (!LcDecodeInstruction(inst, data) || data.mnemonic == InstMnemonic::None) {
-		out = std::format("UNKNOWN OPCD: 0x{:02X}", inst.opcd.Get());
-		strncpy_s(str, LC_INSTRUCTION_LENGTH, out.c_str(), _TRUNCATE);
-		return true;
-	}
-
-	out = gMnemonicStrs[static_cast<uint32_t>(data.mnemonic)];
-
-	constexpr size_t maxOps{ std::size(data.operands) };
-	bool first{ true };
-
-	for (size_t i{ 0 }; i < maxOps && data.operands[i] != InstOperand::None; ++i) {
-		const InstOperand op{ data.operands[i] };
-
-		out += first ? " " : ", ";
-		first = false;
-
-		const bool isDisp{ op == InstOperand::SIMM || op == InstOperand::DS };
-		if (isDisp && i + 1 < maxOps && data.operands[i + 1] == InstOperand::RA0) {
-			out += formatOperand(op, inst);
-			out += "(";
-			out += formatOperand(InstOperand::RA0, inst);
-			out += ")";
-			++i;
-			continue;
-		}
-
-		out += formatOperand(op, inst);
-	}
-
-	strncpy_s(str, LC_INSTRUCTION_LENGTH, out.c_str(), _TRUNCATE);
 
 	return true;
 }

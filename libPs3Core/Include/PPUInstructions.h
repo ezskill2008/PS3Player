@@ -6,8 +6,6 @@
 //Was used for the following things:
 //InstFieldBits (including bit descriptions)
 
-#define LC_INSTRUCTION_LENGTH 64
-
 template<uint32_t First, uint32_t Last, typename T, typename Storage = uint32_t>
 using PpcBits = BitField<(sizeof(Storage) * 8 - 1) - Last, Last - First + 1, T, Storage>;
 
@@ -95,6 +93,7 @@ union InstField {
 	PpcBits<27, 29, uint32_t>	xoMd;    // MD-form
 	PpcBits<27, 30, uint32_t>	xoMds;   // MDS-form
 	PpcBits<21, 29, uint32_t>	xoXs;    // XS-form
+	PpcBits<30, 31, uint32_t>	xoDs;    // DS-form
 
 	// ---- VMX (AltiVec) --------------------------------------------------------------
 	PpcBits<11, 15, uint32_t>	vuimm;
@@ -153,6 +152,10 @@ enum class InstMnemonic {
 	Bc,
 	Sc,
 	B,
+	Rlwimi,
+	Rlwinm,
+	Rlmi,
+	Rlwnm,
 	Ori,
 	Oris,
 	Xori,
@@ -160,6 +163,34 @@ enum class InstMnemonic {
 	Andi,
 	Andis,
 	Lwz,
+	Lwzu,
+	Lbz,
+	Lbzu,
+	Stw,
+	Stwu,
+	Stb,
+	Stbu,
+	Lhz,
+	Lhzu,
+	Lha,
+	Lhau,
+	Sth,
+	Sthu,
+	Lmw,
+	Stmw,
+	Lfs,
+	Lfsu,
+	Lfd,
+	Lfdu,
+	Stfs,
+	Stfsu,
+	Stfd,
+	Stfdu,
+	Std,
+	Stdu,
+	Ba,
+	Bl,
+	Bla,
 };
 
 enum class InstOperand : uint8_t {
@@ -185,8 +216,3 @@ struct InstData {
 CORE_API bool LcDecodeInstruction(
 	const InstField& instField,	//In
 	InstData& inst);			//Out
-
-CORE_API bool LcGetInstructionString(
-	const InstField& inst,
-	char str[LC_INSTRUCTION_LENGTH]);
-
