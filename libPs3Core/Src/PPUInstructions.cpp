@@ -258,72 +258,71 @@ const InstData& selectOpCode3F(const InstField& field) {
 
 	return gOpCode3F[field.xo10];
 }
-
 constexpr static primaryEntry gPrimary[64]{
-	{ { InstMnemonic::None } },																//0x00  0
-	{ { InstMnemonic::None } },																//0x01  1
-	{ { InstMnemonic::Tdi } },																//0x02  2
-	{ { InstMnemonic::Twi } },																//0x03	3
-	{ { InstMnemonic::None } },																//0x04	4
-	{ { InstMnemonic::None } },																//0x05	5
-	{ { InstMnemonic::None } },																//0x06	6
-	{ { InstMnemonic::Mulli } },															//0x07	7
-	{ { InstMnemonic::Subfic } },															//0x08	8
-	{ { InstMnemonic::None } },																//0x09	9
-	{ { InstMnemonic::Cmpli } },															//0x0A 10
-	{ { InstMnemonic::Cmpi } },																//0x0B 11
-	{ { InstMnemonic::Addic } },															//0x0C 12
-	{ { InstMnemonic::Addicd } },															//0x0D 13
-	{ { InstMnemonic::Addi, { InstOperand::RD, InstOperand::RA, InstOperand::SIMM } } },	//0x0E 14	addi RT,RA,SI
-	{ { InstMnemonic::Addis } },															//0x0F 15	addis RT,RA,SI
-	{ { InstMnemonic::Bc, { InstOperand::LI } } },											//0x10 16	bc LI, AA,LK
-	{ { InstMnemonic::Sc } },																//0x11 17
-	{ { InstMnemonic::B, { InstOperand::LI } }, },											//0x12 18	b LI AA,LK
-	{ { InstMnemonic::None }, selectOpCode13 },												//0x13 19
-	{ { InstMnemonic::Rlwimi } },															//0x14 20
-	{ { InstMnemonic::Rlwinm } },															//0x15 21
-	{ { InstMnemonic::None } },																//0x16 22
-	{ { InstMnemonic::Rlwnm } },															//0x17 23
-	{ { InstMnemonic::Ori, { InstOperand::RS, InstOperand::RA, InstOperand::UIMM } } },		//0x18 24
-	{ { InstMnemonic::Oris, { InstOperand::RS, InstOperand::RA, InstOperand::UIMM } } },	//0x19 25
-	{ { InstMnemonic::Xori } },																//0x1A 26
-	{ { InstMnemonic::Xoris } },															//0x1B 27
-	{ { InstMnemonic::Andi } },																//0x1C 28
-	{ { InstMnemonic::Andis } },															//0x1D 29
-	{ { InstMnemonic::None }, selectOpCode1E },												//0x1E 30
-	{ { InstMnemonic::None }, selectOpCode1F },												//0x1F 31
-	{ { InstMnemonic::Lwz, { InstOperand::RD, InstOperand::SIMM, InstOperand::RA0 } } },	//0x20 32
-	{ { InstMnemonic::Lwzu } },																//0x21 33
-	{ { InstMnemonic::Lbz } },																//0x22 34
-	{ { InstMnemonic::Lbzu } },																//0x23 35
-	{ { InstMnemonic::Stw } },																//0x24 36
-	{ { InstMnemonic::Stwu } },																//0x25 37
-	{ { InstMnemonic::Stb } },																//0x26 38
-	{ { InstMnemonic::Stbu } },																//0x27 39
-	{ { InstMnemonic::Lhz } },																//0x28 40
-	{ { InstMnemonic::Lhzu } },																//0x29 41
-	{ { InstMnemonic::Lha } },																//0x2A 42
-	{ { InstMnemonic::Lhau } },																//0x2B 43
-	{ { InstMnemonic::Sth } },																//0x2C 44
-	{ { InstMnemonic::Sthu } },																//0x2D 45
-	{ { InstMnemonic::Lmw } },																//0x2E 46
-	{ { InstMnemonic::Stmw } },																//0x2F 47
-	{ { InstMnemonic::Lfs } },																//0x30 48
-	{ { InstMnemonic::Lfsu } },																//0x31 49
-	{ { InstMnemonic::Lfd } },																//0x32 50
-	{ { InstMnemonic::Lfdu } },																//0x33 51
-	{ { InstMnemonic::Stfs } },																//0x34 52
-	{ { InstMnemonic::Stfsu } },															//0x35 53
-	{ { InstMnemonic::Stfd } },																//0x36 54
-	{ { InstMnemonic::Stfdu } },															//0x37 55
-	{ { InstMnemonic::None } },																//0x38 56
-	{ { InstMnemonic::None } },																//0x39 57
-	{ { InstMnemonic::None }, selectOpCode3A },												//0x3A 58
-	{ { InstMnemonic::None } },																//0x3B 59
-	{ { InstMnemonic::None } },																//0x3C 60
-	{ { InstMnemonic::None } },																//0x3D 61
-	{ { InstMnemonic::None }, selectOpCode3E },												//0x3E 62
-	{ { InstMnemonic::None } },																//0x3F 63
+	{ { InstMnemonic::None } },																								//0x00  0
+	{ { InstMnemonic::None } },																								//0x01  1
+	{ { InstMnemonic::Tdi,    { InstOperand::TO, InstOperand::RA, InstOperand::SIMM } } },									//0x02  2	tdi TO,RA,SI
+	{ { InstMnemonic::Twi,    { InstOperand::TO, InstOperand::RA, InstOperand::SIMM } } },									//0x03  3	twi TO,RA,SI
+	{ { InstMnemonic::None } },																								//0x04  4	(VMX, not in Book I)
+	{ { InstMnemonic::None } },																								//0x05  5
+	{ { InstMnemonic::None } },																								//0x06  6
+	{ { InstMnemonic::Mulli,  { InstOperand::RD, InstOperand::RA, InstOperand::SIMM } } },									//0x07  7	mulli RT,RA,SI
+	{ { InstMnemonic::Subfic, { InstOperand::RD, InstOperand::RA, InstOperand::SIMM } } },									//0x08  8	subfic RT,RA,SI
+	{ { InstMnemonic::None } },																								//0x09  9
+	{ { InstMnemonic::Cmpli,  { InstOperand::CRFD, InstOperand::L, InstOperand::RA, InstOperand::UIMM } } },				//0x0A 10	cmpli BF,L,RA,UI
+	{ { InstMnemonic::Cmpi,   { InstOperand::CRFD, InstOperand::L, InstOperand::RA, InstOperand::SIMM } } },				//0x0B 11	cmpi BF,L,RA,SI
+	{ { InstMnemonic::Addic,  { InstOperand::RD, InstOperand::RA, InstOperand::SIMM } } },									//0x0C 12	addic RT,RA,SI
+	{ { InstMnemonic::Addicd, { InstOperand::RD, InstOperand::RA, InstOperand::SIMM } } },									//0x0D 13	addic. RT,RA,SI
+	{ { InstMnemonic::Addi,   { InstOperand::RD, InstOperand::RA0, InstOperand::SIMM } } },									//0x0E 14	addi RT,RA|0,SI
+	{ { InstMnemonic::Addis,  { InstOperand::RD, InstOperand::RA0, InstOperand::SIMM } } },									//0x0F 15	addis RT,RA|0,SI
+	{ { InstMnemonic::Bc,     { InstOperand::BO, InstOperand::BI, InstOperand::BD } } },									//0x10 16	bc BO,BI,BD (AA,LK)
+	{ { InstMnemonic::Sc,     { InstOperand::LEV } } },																		//0x11 17	sc LEV
+	{ { InstMnemonic::B,      { InstOperand::LI } } },																		//0x12 18	b LI (AA,LK)
+	{ { InstMnemonic::None }, selectOpCode13 },																				//0x13 19
+	{ { InstMnemonic::Rlwimi, { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB, InstOperand::ME } } },	//0x14 20	rlwimi RA,RS,SH,MB,ME
+	{ { InstMnemonic::Rlwinm, { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB, InstOperand::ME } }	},	//0x15 21	rlwinm RA,RS,SH,MB,ME
+	{ { InstMnemonic::None } },																								//0x16 22	(rlmi, POWER only)
+	{ { InstMnemonic::Rlwnm,  { InstOperand::RA, InstOperand::RS, InstOperand::RB, InstOperand::MB, InstOperand::ME } } },	//0x17 23	rlwnm RA,RS,RB,MB,ME
+	{ { InstMnemonic::Ori,    { InstOperand::RA, InstOperand::RS, InstOperand::UIMM } } },									//0x18 24	ori RA,RS,UI
+	{ { InstMnemonic::Oris,   { InstOperand::RA, InstOperand::RS, InstOperand::UIMM } } },									//0x19 25	oris RA,RS,UI
+	{ { InstMnemonic::Xori,   { InstOperand::RA, InstOperand::RS, InstOperand::UIMM } } },									//0x1A 26	xori RA,RS,UI
+	{ { InstMnemonic::Xoris,  { InstOperand::RA, InstOperand::RS, InstOperand::UIMM } } },									//0x1B 27	xoris RA,RS,UI
+	{ { InstMnemonic::Andi,   { InstOperand::RA, InstOperand::RS, InstOperand::UIMM } } },									//0x1C 28	andi. RA,RS,UI
+	{ { InstMnemonic::Andis,  { InstOperand::RA, InstOperand::RS, InstOperand::UIMM } } },									//0x1D 29	andis. RA,RS,UI
+	{ { InstMnemonic::None }, selectOpCode1E },																				//0x1E 30
+	{ { InstMnemonic::None }, selectOpCode1F },																				//0x1F 31
+	{ { InstMnemonic::Lwz,    { InstOperand::RD, InstOperand::SIMM, InstOperand::RA0 } } },									//0x20 32	lwz RT,D(RA|0)
+	{ { InstMnemonic::Lwzu,   { InstOperand::RD, InstOperand::SIMM, InstOperand::RA } } },									//0x21 33	lwzu RT,D(RA)
+	{ { InstMnemonic::Lbz,    { InstOperand::RD, InstOperand::SIMM, InstOperand::RA0 } } },									//0x22 34
+	{ { InstMnemonic::Lbzu,   { InstOperand::RD, InstOperand::SIMM, InstOperand::RA } } },									//0x23 35
+	{ { InstMnemonic::Stw,    { InstOperand::RS, InstOperand::SIMM, InstOperand::RA0 } } },									//0x24 36
+	{ { InstMnemonic::Stwu,   { InstOperand::RS, InstOperand::SIMM, InstOperand::RA } } },									//0x25 37
+	{ { InstMnemonic::Stb,    { InstOperand::RS, InstOperand::SIMM, InstOperand::RA0 } } },									//0x26 38
+	{ { InstMnemonic::Stbu,   { InstOperand::RS, InstOperand::SIMM, InstOperand::RA } } },									//0x27 39
+	{ { InstMnemonic::Lhz,    { InstOperand::RD, InstOperand::SIMM, InstOperand::RA0 } } },									//0x28 40
+	{ { InstMnemonic::Lhzu,   { InstOperand::RD, InstOperand::SIMM, InstOperand::RA } } },									//0x29 41
+	{ { InstMnemonic::Lha,    { InstOperand::RD, InstOperand::SIMM, InstOperand::RA0 } } },									//0x2A 42
+	{ { InstMnemonic::Lhau,   { InstOperand::RD, InstOperand::SIMM, InstOperand::RA } } },									//0x2B 43
+	{ { InstMnemonic::Sth,    { InstOperand::RS, InstOperand::SIMM, InstOperand::RA0 } } },									//0x2C 44
+	{ { InstMnemonic::Sthu,   { InstOperand::RS, InstOperand::SIMM, InstOperand::RA } } },									//0x2D 45
+	{ { InstMnemonic::Lmw,    { InstOperand::RD, InstOperand::SIMM, InstOperand::RA0 } } },									//0x2E 46
+	{ { InstMnemonic::Stmw,   { InstOperand::RS, InstOperand::SIMM, InstOperand::RA0 } } },									//0x2F 47
+	{ { InstMnemonic::Lfs,    { InstOperand::FRD, InstOperand::SIMM, InstOperand::RA0 } } },								//0x30 48
+	{ { InstMnemonic::Lfsu,   { InstOperand::FRD, InstOperand::SIMM, InstOperand::RA } } },									//0x31 49
+	{ { InstMnemonic::Lfd,    { InstOperand::FRD, InstOperand::SIMM, InstOperand::RA0 } } },								//0x32 50
+	{ { InstMnemonic::Lfdu,   { InstOperand::FRD, InstOperand::SIMM, InstOperand::RA } } },									//0x33 51
+	{ { InstMnemonic::Stfs,   { InstOperand::FRS, InstOperand::SIMM, InstOperand::RA0 } } },								//0x34 52
+	{ { InstMnemonic::Stfsu,  { InstOperand::FRS, InstOperand::SIMM, InstOperand::RA } } },									//0x35 53
+	{ { InstMnemonic::Stfd,   { InstOperand::FRS, InstOperand::SIMM, InstOperand::RA0 } } },								//0x36 54
+	{ { InstMnemonic::Stfdu,  { InstOperand::FRS, InstOperand::SIMM, InstOperand::RA } } },									//0x37 55
+	{ { InstMnemonic::None } },																								//0x38 56
+	{ { InstMnemonic::None } },																								//0x39 57
+	{ { InstMnemonic::None }, selectOpCode3A },																				//0x3A 58
+	{ { InstMnemonic::None }, selectOpCode3B },																				//0x3B 59
+	{ { InstMnemonic::None } },																								//0x3C 60
+	{ { InstMnemonic::None } },																								//0x3D 61
+	{ { InstMnemonic::None }, selectOpCode3E },																				//0x3E 62
+	{ { InstMnemonic::None }, selectOpCode3F },																				//0x3F 63
 };
 
 bool

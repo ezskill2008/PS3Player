@@ -299,18 +299,6 @@ LpsLoadDisk(
 
 	disk = d;
 
-#if _DEBUG
-	for (uint32_t i = 0; i < disk->regionCount; ++i)
-		printf("region %u: %u..%u enc=%d\n", i,
-			disk->regions[i].start, disk->regions[i].end,
-			disk->regions[i].encrypted);
-
-	uint8_t hdr[48];
-	readAt(disk->file, 0, hdr, sizeof hdr);
-	for (int i = 0; i < 48; i += 4)
-		printf("%02x: %02x%02x%02x%02x\n", i, hdr[i], hdr[i + 1], hdr[i + 2], hdr[i + 3]);
-#endif
-
 	return true;
 }
 

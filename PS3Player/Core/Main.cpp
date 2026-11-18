@@ -73,12 +73,6 @@ int main() {
 
 	PrintTree(disk, "");
 
-	LpsListDir(disk, "/", [](const char* name, const IsoFileInfo* info, void*) {
-		printf("%s %s %llu\n", info->isDirectory ? "<DIR>" : "     ", name,
-			(unsigned long long)info->size);
-		return true;
-		}, nullptr);
-
 	// read EBOOT.BIN
 	IsoFile f{ nullptr };
 	if (!LpsOpenFile(disk, "PS3_GAME/USRDIR/EBOOT.BIN", f)) {
@@ -138,6 +132,7 @@ int main() {
 
 	DissassemblyOptions dissOptions{};
 	dissOptions.includePc = false;
+	dissOptions.nonFollowOps = 256;
 
 	OutputDissassemblyToStdOut(prg, mem, dissOptions);
 
