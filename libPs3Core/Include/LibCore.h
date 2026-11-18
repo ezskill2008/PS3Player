@@ -11,6 +11,11 @@ CORE_API void LcLogError(
 	const char* function,
 	size_t line);
 
+CORE_API bool LcWriteFile(
+	const char* file,
+	const uint8_t* const data,
+	size_t length);
+
 inline uint16_t
 LcBSwap16(uint16_t b) {
 	return _byteswap_ushort(b);

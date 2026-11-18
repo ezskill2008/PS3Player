@@ -55,12 +55,12 @@ int main() {
 		return -1;
 #else
 	if (!LpsReadKey(
-		"E:\\Games\\Minecraft - PlayStation 3 Edition (Europe).key",
+		"D:\\Games\\Minecraft - PlayStation 3 Edition (Europe).key",
 		isoKey))
 		return -1;
 
 	if (!LpsLoadDisk(
-		"E:\\Games\\Minecraft - PlayStation 3 Edition (Europe).iso",
+		"D:\\Games\\Minecraft - PlayStation 3 Edition (Europe).iso",
 		disk))
 		return -1;
 #endif
@@ -97,7 +97,7 @@ int main() {
 	if (!LpsLoadSelfKeys("D:\\code\\PS3Content\\keys.txt", keys))
 		return -1;
 #else
-	if (!LpsLoadSelfKeys("E:\\keys.txt", keys))
+	if (!LpsLoadSelfKeys("D:\\keys.txt", keys))
 		return -1;
 #endif
 
@@ -136,7 +136,10 @@ int main() {
 		&& prxParams.magic == PRXPARAMS_MAGIC))
 		return false;
 
-	OutputDissAssemblyToStdOut(prg, mem);
+	DissassemblyOptions dissOptions{};
+	dissOptions.includePc = false;
+
+	OutputDissassemblyToStdOut(prg, mem, dissOptions);
 
 	mem.Release();
 	LpsReleaseDisk(disk);

@@ -138,59 +138,235 @@ static_assert(std::is_trivially_copyable_v<InstField>);
 
 enum class InstMnemonic {
 	None = 0,
-	Tdi,
-	Twi,
-	Mulli,
-	Subfic,
-	Dozi,
-	Cmpli,
-	Cmpi,
-	Addic,
-	Addicd,
-	Addi,
-	Addis,
-	Bc,
-	Sc,
-	B,
-	Rlwimi,
-	Rlwinm,
-	Rlmi,
-	Rlwnm,
-	Ori,
-	Oris,
-	Xori,
-	Xoris,
-	Andi,
-	Andis,
-	Lwz,
-	Lwzu,
-	Lbz,
-	Lbzu,
-	Stw,
-	Stwu,
-	Stb,
-	Stbu,
-	Lhz,
-	Lhzu,
-	Lha,
-	Lhau,
-	Sth,
-	Sthu,
-	Lmw,
-	Stmw,
-	Lfs,
-	Lfsu,
-	Lfd,
-	Lfdu,
-	Stfs,
-	Stfsu,
-	Stfd,
-	Stfdu,
-	Std,
-	Stdu,
-	Ba,
-	Bl,
-	Bla,
+
+	// ---- Primary opcodes (OPCD only, in opcode order) ----
+	Tdi,		// 2
+	Twi,		// 3
+	Mulli,		// 7
+	Subfic,		// 8
+	Cmpli,		// 10
+	Cmpi,		// 11
+	Addic,		// 12
+	Addicd,		// 13 (addic.)
+	Addi,		// 14
+	Addis,		// 15
+	Bc,			// 16 (bc/bca/bcl/bcla)
+	Sc,			// 17
+	B,			// 18 (b/ba/bl/bla)
+	Rlwimi,		// 20
+	Rlwinm,		// 21
+	Rlwnm,		// 23
+	Ori,		// 24
+	Oris,		// 25
+	Xori,		// 26
+	Xoris,		// 27
+	Andi,		// 28 (andi.)
+	Andis,		// 29 (andis.)
+	Lwz,		// 32
+	Lwzu,		// 33
+	Lbz,		// 34
+	Lbzu,		// 35
+	Stw,		// 36
+	Stwu,		// 37
+	Stb,		// 38
+	Stbu,		// 39
+	Lhz,		// 40
+	Lhzu,		// 41
+	Lha,		// 42
+	Lhau,		// 43
+	Sth,		// 44
+	Sthu,		// 45
+	Lmw,		// 46
+	Stmw,		// 47
+	Lfs,		// 48
+	Lfsu,		// 49
+	Lfd,		// 50
+	Lfdu,		// 51
+	Stfs,		// 52
+	Stfsu,		// 53
+	Stfd,		// 54
+	Stfdu,		// 55
+	Ld,			// 58, XO 0
+	Ldu,		// 58, XO 1
+	Lwa,		// 58, XO 2
+	Std,		// 62, XO 0
+	Stdu,		// 62, XO 1
+
+	// ---- Opcode 19: CR ops / branch to register (XL-form) ----
+	Mcrf,
+	Bclr,		// bclr/bclrl
+	Crnor,
+	Crandc,
+	Crxor,
+	Crnand,
+	Crand,
+	Creqv,
+	Crorc,
+	Cror,
+	Bcctr,		// bcctr/bcctrl
+
+	// ---- Opcode 30: 64-bit rotates (MD/MDS-form) ----
+	Rldicl,
+	Rldicr,
+	Rldic,
+	Rldimi,
+	Rldcl,
+	Rldcr,
+
+	// ---- Opcode 31: compare / trap ----
+	Cmp,
+	Cmpl,
+	Tw,
+	Td,
+
+	// ---- Opcode 31: integer loads ----
+	Lbzx,
+	Lbzux,
+	Lhzx,
+	Lhzux,
+	Lhax,
+	Lhaux,
+	Lwzx,
+	Lwzux,
+	Lwax,
+	Lwaux,
+	Ldx,
+	Ldux,
+
+	// ---- Opcode 31: integer stores ----
+	Stbx,
+	Stbux,
+	Sthx,
+	Sthux,
+	Stwx,
+	Stwux,
+	Stdx,
+	Stdux,
+
+	// ---- Opcode 31: byte-reversed loads/stores ----
+	Lhbrx,
+	Lwbrx,
+	Sthbrx,
+	Stwbrx,
+
+	// ---- Opcode 31: move assist (string) ----
+	Lswi,
+	Lswx,
+	Stswi,
+	Stswx,
+
+	// ---- Opcode 31: arithmetic (XO-form, OE/Rc merged) ----
+	Add,
+	Addc,
+	Adde,
+	Addme,
+	Addze,
+	Subf,
+	Subfc,
+	Subfe,
+	Subfme,
+	Subfze,
+	Neg,
+	Mullw,
+	Mulld,
+	Mulhw,
+	Mulhwu,
+	Mulhd,
+	Mulhdu,
+	Divw,
+	Divwu,
+	Divd,
+	Divdu,
+
+	// ---- Opcode 31: logical ----
+	And,
+	Andc,
+	Or,
+	Orc,
+	Xor,
+	Nand,
+	Nor,
+	Eqv,
+	Extsb,
+	Extsh,
+	Extsw,
+	Cntlzw,
+	Cntlzd,
+
+	// ---- Opcode 31: shifts ----
+	Slw,
+	Srw,
+	Sraw,
+	Srawi,
+	Sld,
+	Srd,
+	Srad,
+	Sradi,
+
+	// ---- Opcode 31: move to/from system registers ----
+	Mfspr,
+	Mtspr,
+	Mfcr,
+	Mtcrf,
+	Mfocrf,		// optional (ch. 5)
+	Mtocrf,		// optional (ch. 5)
+	Mcrxr,		// phased out (ch. 6)
+
+	// ---- Opcode 31: floating-point loads/stores (indexed) ----
+	Lfsx,
+	Lfsux,
+	Lfdx,
+	Lfdux,
+	Stfsx,
+	Stfsux,
+	Stfdx,
+	Stfdux,
+	Stfiwx,
+
+	// ---- Opcode 59: single-precision FP ----
+	Fdivs,
+	Fsubs,
+	Fadds,
+	Fsqrts,		// optional
+	Fres,		// optional
+	Fmuls,
+	Fmsubs,
+	Fmadds,
+	Fnmsubs,
+	Fnmadds,
+
+	// ---- Opcode 63: double-precision FP ----
+	Fcmpu,
+	Fcmpo,
+	Frsp,
+	Fctiw,
+	Fctiwz,
+	Fctid,
+	Fctidz,
+	Fcfid,
+	Fdiv,
+	Fsub,
+	Fadd,
+	Fsqrt,		// optional
+	Fsel,		// optional
+	Fmul,
+	Frsqrte,	// optional
+	Fmsub,
+	Fmadd,
+	Fnmsub,
+	Fnmadd,
+	Fmr,
+	Fneg,
+	Fabs,
+	Fnabs,
+
+	// ---- Opcode 63: FPSCR ----
+	Mffs,
+	Mcrfs,
+	Mtfsfi,
+	Mtfsf,
+	Mtfsb0,
+	Mtfsb1,
 };
 
 enum class InstOperand : uint8_t {
