@@ -53,7 +53,7 @@ setCRFixedPoint(PPU& ppu, int64_t value, bool SO) {
 }
 
 namespace fixedp {
-//fixed point load
+#pragma region fixed point load
 void
 lbz(PPU& ppu) {
 	DEFINE_OPS(rd, ra, d);
@@ -61,7 +61,131 @@ lbz(PPU& ppu) {
 	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
 	const uint64_t ea{ b + static_cast<int64_t>(static_cast<int16_t>(d)) };
 
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read8(static_cast<uint32_t>(ea)));
+}
 
+void
+lbzu(PPU& ppu) {
+	DEFINE_OPS(rd, ra, d);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + static_cast<int64_t>(static_cast<int16_t>(d)) };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read8(static_cast<uint32_t>(ea)));
+	gpr[ra] = ea;
+}
+
+void
+lbzx(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read8(static_cast<uint32_t>(ea)));
+}
+
+void
+lbzux(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read8(static_cast<uint32_t>(ea)));
+	gpr[ra] = ea;
+}
+
+void
+lhz(PPU& ppu) {
+	DEFINE_OPS(rd, ra, d);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + static_cast<int64_t>(static_cast<int16_t>(d)) };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read16(static_cast<uint32_t>(ea)));
+}
+
+void
+lhzu(PPU& ppu) {
+	DEFINE_OPS(rd, ra, d);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + static_cast<int64_t>(static_cast<int16_t>(d)) };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read16(static_cast<uint32_t>(ea)));
+	gpr[ra] = ea;
+}
+
+void
+lhzx(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read16(static_cast<uint32_t>(ea)));
+}
+
+void
+lhzux(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read16(static_cast<uint32_t>(ea)));
+	gpr[ra] = ea;
+}
+
+void
+lha(PPU& ppu) {
+	DEFINE_OPS(rd, d, ra);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + static_cast<int64_t>(static_cast<int16_t>(d)) };
+
+	gpr[rd] = static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(
+		ppu.guestMem->Read16(static_cast<uint32_t>(ea))
+		)));
+}
+
+void
+lhau(PPU& ppu) {
+	DEFINE_OPS(rd, d, ra);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + static_cast<int64_t>(static_cast<int16_t>(d)) };
+
+	gpr[rd] = static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(
+		ppu.guestMem->Read16(static_cast<uint32_t>(ea))
+		)));
+	gpr[ra] = ea;
+}
+
+void
+lhax(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(
+		ppu.guestMem->Read16(static_cast<uint32_t>(ea))
+		)));
+}
+
+void
+lhaux(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(
+		ppu.guestMem->Read16(static_cast<uint32_t>(ea))
+		)));
+	gpr[ra] = ea;
 }
 
 void
@@ -71,8 +195,121 @@ lwz(PPU& ppu) {
 	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
 	const uint64_t ea{ b + static_cast<int64_t>(static_cast<int16_t>(d)) };
 	
-	gpr[rd] = ppu.guestMem->Read32(static_cast<uint32_t>(ea));
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read32(static_cast<uint32_t>(ea)));
 }
+
+void
+lwzu(PPU& ppu) {
+	DEFINE_OPS(rd, d, ra);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + static_cast<int64_t>(static_cast<int16_t>(d)) };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read32(static_cast<uint32_t>(ea)));
+	gpr[ra] = ea;
+}
+
+void
+lwzx(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read32(static_cast<uint32_t>(ea)));
+}
+
+void
+lwzux(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read32(static_cast<uint32_t>(ea)));
+	gpr[ra] = ea;
+}
+
+void
+lwa(PPU& ppu) {
+	DEFINE_OPS(rd, ra, ds);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(ppu.inst.DispDS())) };
+
+	gpr[rd] = static_cast<uint64_t>(static_cast<int64_t>(static_cast<int32_t>(
+		ppu.guestMem->Read32(static_cast<uint32_t>(ea))
+		)));
+}
+
+void
+lwax(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(static_cast<int64_t>(static_cast<int32_t>(
+		ppu.guestMem->Read32(static_cast<uint32_t>(ea))
+		)));
+}
+
+void
+lwaux(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = static_cast<uint64_t>(static_cast<int64_t>(static_cast<int32_t>(
+		ppu.guestMem->Read32(static_cast<uint32_t>(ea))
+		)));
+	gpr[ra] = ea;
+}
+
+void
+ld(PPU& ppu) {
+	DEFINE_OPS(rd, ra, ds);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(ppu.inst.DispDS())) };
+
+	gpr[rd] = ppu.guestMem->Read64(static_cast<uint32_t>(ea));
+}
+
+void
+ldu(PPU& ppu) {
+	DEFINE_OPS(rd, ra, ds);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(ppu.inst.DispDS())) };
+
+	gpr[rd] = ppu.guestMem->Read64(static_cast<uint32_t>(ea));
+	gpr[ra] = ea;
+}
+
+void
+ldx(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = ppu.guestMem->Read64(static_cast<uint32_t>(ea));
+}
+
+void
+ldux(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = ppu.guestMem->Read64(static_cast<uint32_t>(ea));
+	gpr[ra] = ea;
+}
+
+#pragma endregion
 
 //fixed point store
 void
