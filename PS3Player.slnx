@@ -9,6 +9,9 @@
       <BuildDependency Project="libPs3Core/libPs3Core.vcxproj" />
     </Project>
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="readme.md" />
+  </Folder>
   <Project Path="PS3Player/PS3Player.vcxproj" Id="9820db42-e8a3-4c85-954d-6bbdc3df22b1">
     <BuildDependency Project="libPs3Core/libPs3Core.vcxproj" />
     <BuildDependency Project="libPs3Decrypt/libPs3Decrypt.vcxproj" />
