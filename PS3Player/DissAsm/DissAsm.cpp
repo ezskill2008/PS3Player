@@ -257,6 +257,11 @@ hex(int64_t v) {
 	return stream.str();
 }
 
+static bool
+isRegOperand(InstOperand op) {
+	return op >= InstOperand::RD && op <= InstOperand::VC;
+}
+
 static std::string
 formatOperand(InstOperand op, const InstField& f) {
 	switch (op) {
@@ -788,7 +793,7 @@ getInstructionString(
 	InstData data{};
 	std::string out{};
 
-	if (!LcDecodeInstruction(inst, data) || data.mnemonic == InstMnemonic::None) {
+	if (!DecodeInstruction(inst, data) || data.mnemonic == InstMnemonic::None) {
 		const uint32_t opcd{ inst.opcd.Get() };
 
 		if (opcd == 0x13 || opcd == 0x1F || opcd == 0x3B || opcd == 0x3F)
@@ -809,31 +814,49 @@ getInstructionString(
 
 	constexpr size_t maxOps{ std::size(data.operands) };
 	bool first{ true };
+	std::string prev{};
 
 	for (size_t i{ 0 }; i < maxOps && data.operands[i] != InstOperand::None; ++i) {
 		const InstOperand op{ data.operands[i] };
 
-		out += first ? " " : ", ";
-		first = false;
-
-		// d(rA) form: displacement followed by the base register
 		const bool isDisp{ op == InstOperand::SIMM || op == InstOperand::DS };
-		if (isDisp && i + 1 < maxOps &&
-			(data.operands[i + 1] == InstOperand::RA0 || data.operands[i + 1] == InstOperand::RA)) {
-			out += formatOperand(op, inst);
-			out += "(";
-			out += formatOperand(data.operands[i + 1], inst);
-			out += ")";
+		if (isDisp && i + 1 < maxOps && data.operands[i + 1] == InstOperand::RA0) {
+			out += first ? " " : ", ";
+			first = false;
+			out += formatOperand(op, inst) + "(" + formatOperand(InstOperand::RA0, inst) + ")";
+			prev.clear();
 			++i;
 			continue;
 		}
 
-		out += formatOperand(op, inst);
+		const std::string text{ formatOperand(op, inst) };
+
+		if (isRegOperand(op) && text == prev)
+			continue;   // duplicate register, print it once
+
+		out += first ? " " : ", ";
+		first = false;
+		out += text;
+		prev = text;
 	}
 
 	strncpy_s(str, LC_INSTRUCTION_LENGTH, out.c_str(), _TRUNCATE);
 
 	return true;
+}
+
+void
+PrintInstruction(
+	uint32_t raw,
+	uint32_t pc) {
+
+	InstField inst{ raw };
+
+	char str[LC_INSTRUCTION_LENGTH]{};
+	getInstructionString(inst, str, pc);
+
+	printf("%#010x ", pc);
+	printf("%s\n", str);
 }
 
 bool
@@ -854,9 +877,6 @@ OutputDissassemblyToStdOut(
 		const uint32_t raw{ mem.Read32(pc) };
 
 		InstField inst{ raw };
-		InstData data{};
-
-		LcDecodeInstruction(inst, data);
 
 		char str[LC_INSTRUCTION_LENGTH]{};
 		getInstructionString(inst, str, pc);

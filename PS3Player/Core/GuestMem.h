@@ -10,7 +10,7 @@ struct MemRange {
 };
 
 struct GuestMem {
-	static constexpr uint64_t	kSize{ 1ull << 32 };
+	static constexpr uint64_t	kSize{ 1ull << 26 };
 	uint8_t*					base{ nullptr };
 	std::vector<MemRange>		ranges;
 
@@ -66,6 +66,19 @@ struct GuestMem {
 	
 		return false;
 	}
+
+	uint8_t Read8(
+		uint32_t addr) const {
+		const uint8_t* p{ base + addr };
+		return p[0];
+	}
+
+	uint16_t Read16(
+		uint32_t addr) const {
+		const uint8_t* p{ base + addr };
+
+		return uint16_t((uint16_t(p[0]) << 8) | p[1]);
+	}
 	
 	uint32_t Read32(
 		uint32_t addr) const {
@@ -74,10 +87,40 @@ struct GuestMem {
 		return (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) | (uint32_t(p[2]) << 8) | p[3];
 	}
 
+	uint64_t Read64(
+		uint32_t addr) const {
+		const uint8_t* p{ base + addr };
+
+		return (uint64_t(p[0]) << 56) | (uint64_t(p[1]) << 48) | (uint64_t(p[2]) << 40) | (uint64_t(p[3]) << 32)
+			| (uint64_t(p[4]) << 24) | (uint64_t(p[5]) << 16) | (uint64_t(p[6]) << 8) | p[7];
+	}
+
+	void Write8(
+		uint32_t addr,
+		uint8_t v) {
+		uint8_t* p{ base + addr };
+		p[0] = v;
+	}
+
+	void Write16(
+		uint32_t addr,
+		uint16_t v) {
+		uint8_t* p{ base + addr };
+		p[0] = uint8_t(v >> 8); p[1] = uint8_t(v);
+	}
+
 	void Write32(
 		uint32_t addr, 
 		uint32_t v) {
 		uint8_t* p{ base + addr };
 		p[0] = uint8_t(v >> 24); p[1] = uint8_t(v >> 16); p[2] = uint8_t(v >> 8); p[3] = uint8_t(v);
+	}
+
+	void Write64(
+		uint32_t addr,
+		uint64_t v) {
+		uint8_t* p{ base + addr };
+		p[0] = uint8_t(v >> 56); p[1] = uint8_t(v >> 48); p[2] = uint8_t(v >> 40); p[3] = uint8_t(v >> 32);
+		p[4] = uint8_t(v >> 24); p[5] = uint8_t(v >> 16); p[6] = uint8_t(v >> 8);  p[7] = uint8_t(v);
 	}
 };

@@ -21,11 +21,9 @@
   <ItemGroup>
     <ClInclude Include="Include\BitTypes.h" />
     <ClInclude Include="Include\CoreTypes.h" />
-    <ClInclude Include="Include\PPUInstructions.h" />
     <ClInclude Include="Include\LibCore.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\PPUInstructions.cpp" />
     <ClCompile Include="Src\LibCore.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

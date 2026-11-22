@@ -1,4 +1,4 @@
-#include <libPs3Core/Include/PPUInstructions.h>
+#include <PS3Player/Emu/PPUInstructions.h>
 #include <array>
 
 typedef const InstData& (*selectFn)(const InstField&);
@@ -326,7 +326,7 @@ constexpr static primaryEntry gPrimary[64]{
 };
 
 bool
-LcDecodeInstruction(
+DecodeInstruction(
 	const InstField& instField,
 	InstData& inst) {
 	const primaryEntry& primary{ gPrimary[instField.opcd] };

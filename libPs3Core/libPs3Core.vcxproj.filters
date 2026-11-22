@@ -21,18 +21,12 @@
     <ClInclude Include="Include\LibCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PPUInstructions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\BitTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\LibCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\PPUInstructions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

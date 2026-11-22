@@ -140,57 +140,57 @@ enum class InstMnemonic {
 	None = 0,
 
 	// ---- Primary opcodes (OPCD only, in opcode order) ----
-	Tdi,		// 2
-	Twi,		// 3
-	Mulli,		// 7
-	Subfic,		// 8
-	Cmpli,		// 10
-	Cmpi,		// 11
-	Addic,		// 12
-	Addicd,		// 13 (addic.)
-	Addi,		// 14
-	Addis,		// 15
-	Bc,			// 16 (bc/bca/bcl/bcla)
-	Sc,			// 17
-	B,			// 18 (b/ba/bl/bla)
-	Rlwimi,		// 20
-	Rlwinm,		// 21
-	Rlwnm,		// 23
-	Ori,		// 24
-	Oris,		// 25
-	Xori,		// 26
-	Xoris,		// 27
-	Andi,		// 28 (andi.)
-	Andis,		// 29 (andis.)
-	Lwz,		// 32
-	Lwzu,		// 33
-	Lbz,		// 34
-	Lbzu,		// 35
-	Stw,		// 36
-	Stwu,		// 37
-	Stb,		// 38
-	Stbu,		// 39
-	Lhz,		// 40
-	Lhzu,		// 41
-	Lha,		// 42
-	Lhau,		// 43
-	Sth,		// 44
-	Sthu,		// 45
-	Lmw,		// 46
-	Stmw,		// 47
-	Lfs,		// 48
-	Lfsu,		// 49
-	Lfd,		// 50
-	Lfdu,		// 51
-	Stfs,		// 52
-	Stfsu,		// 53
-	Stfd,		// 54
-	Stfdu,		// 55
-	Ld,			// 58, XO 0
-	Ldu,		// 58, XO 1
-	Lwa,		// 58, XO 2
-	Std,		// 62, XO 0
-	Stdu,		// 62, XO 1
+	Tdi,
+	Twi,
+	Mulli,
+	Subfic,
+	Cmpli,
+	Cmpi,
+	Addic,
+	Addicd,		//(addic.)
+	Addi,
+	Addis,
+	Bc,			//(bc/bca/bcl/bcla)
+	Sc,
+	B,			//(b/ba/bl/bla)
+	Rlwimi,
+	Rlwinm,
+	Rlwnm,
+	Ori,
+	Oris,
+	Xori,
+	Xoris,
+	Andi,		//(andi.)
+	Andis,		//(andis.)
+	Lwz,
+	Lwzu,
+	Lbz,
+	Lbzu,
+	Stw,
+	Stwu,
+	Stb,
+	Stbu,
+	Lhz,
+	Lhzu,
+	Lha,
+	Lhau,
+	Sth,
+	Sthu,
+	Lmw,
+	Stmw,
+	Lfs,
+	Lfsu,
+	Lfd,
+	Lfdu,
+	Stfs,
+	Stfsu,
+	Stfd,
+	Stfdu,
+	Ld,			//XO 0
+	Ldu,		//XO 1
+	Lwa,		//XO 2
+	Std,		//XO 0
+	Stdu,		//XO 1
 
 	// ---- Opcode 19: CR ops / branch to register (XL-form) ----
 	Mcrf,
@@ -389,6 +389,6 @@ struct InstData {
 	InstOperand		operands[5]{};
 };
 
-CORE_API bool LcDecodeInstruction(
+CORE_API bool DecodeInstruction(
 	const InstField& instField,	//In
 	InstData& inst);			//Out

@@ -2,7 +2,8 @@
 #include <PS3Player/DissAsm/DissAsm.h>
 
 #include <libPs3Core/Include/BitTypes.h>
-#include <libPs3Core/Include/PPUInstructions.h>
+#include <PS3Player/Emu/PPU.h>
+#include <PS3Player/Emu/PPUInstructions.h>
 
 #include <libPs3Decrypt/Include/DecryptISO.h>
 #include <libPs3Decrypt/Include/DecryptSELF.h>
@@ -130,11 +131,20 @@ int main() {
 		&& prxParams.magic == PRXPARAMS_MAGIC))
 		return false;
 
-	DissassemblyOptions dissOptions{};
-	dissOptions.includePc = false;
-	dissOptions.nonFollowOps = 256;
+	//DissassemblyOptions dissOptions{};
+	//dissOptions.includePc = false;
+	//dissOptions.nonFollowOps = 256;
 
-	OutputDissassemblyToStdOut(prg, mem, dissOptions);
+	//OutputDissassemblyToStdOut(prg, mem, dissOptions);
+
+	PPU ppu{};
+	ppu.reg.pc = prg.opd.entryPc;
+	ppu.reg.gpr[2] = static_cast<uint64_t>(prg.opd.toc);
+	ppu.guestMem = &mem;
+
+	for (uint32_t i{ 0 };i < 10;++i) {
+		PPUCycle(ppu);
+	}
 
 	mem.Release();
 	LpsReleaseDisk(disk);

@@ -146,11 +146,17 @@
     <ClCompile Include="Core\Main.cpp" />
     <ClCompile Include="DissAsm\DissAsm.cpp" />
     <ClCompile Include="Elf\Elf.cpp" />
+    <ClCompile Include="Emu\PPU.cpp" />
+    <ClCompile Include="Emu\PPUFetch.cpp" />
+    <ClCompile Include="Emu\PPUInstructions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\GuestMem.h" />
     <ClInclude Include="DissAsm\DissAsm.h" />
     <ClInclude Include="Elf\Elf.h" />
+    <ClInclude Include="Emu\PPU.h" />
+    <ClInclude Include="Emu\PPUFetch.h" />
+    <ClInclude Include="Emu\PPUInstructions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
