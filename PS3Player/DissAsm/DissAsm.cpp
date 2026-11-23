@@ -855,7 +855,7 @@ PrintInstruction(
 	char str[LC_INSTRUCTION_LENGTH]{};
 	getInstructionString(inst, str, pc);
 
-	printf("%#010x ", pc);
+	printf("%#010X ", pc);
 	printf("%s\n", str);
 }
 

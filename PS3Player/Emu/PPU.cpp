@@ -36,6 +36,21 @@ constexpr auto ops_val(const Arr& a) {
 
 typedef void(*instructionOp)(PPU& ppu);
 
+namespace rot {
+inline uint64_t
+rotl32dup(uint64_t x, uint64_t n) {
+	const uint64_t w{ x & 0xFFFFFFFFull };
+	return std::rotl((w << 32) | w, static_cast<int>(n & 31));
+}
+
+inline uint64_t
+mask64(uint64_t mb, uint64_t me) {
+	const uint64_t begin{ ~0ull >> mb };
+	const uint64_t end{ ~0ull << (63 - me) };
+	return (mb <= me) ? (begin & end) : (begin | end);
+}
+}
+
 namespace cr {
 inline void
 setCRField(PPU& ppu, uint32_t field, uint8_t bits) {
@@ -49,6 +64,27 @@ setCRFixedPoint(PPU& ppu, int64_t value, bool SO) {
 	uint8_t bits{ value < 0 ? CR_LT : value > 0 ? CR_GT : CR_EQ };
 	if (SO) bits |= CR_SO;
 	setCRField(ppu, 0, bits);
+}
+
+inline void
+updateRc(PPU& ppu, uint64_t r) {
+	if (ppu.inst.rc) {
+		cr::setCRFixedPoint(ppu, static_cast<int64_t>(r), (ppu.reg.xer & XER_SO) != 0);
+	}
+}
+}
+
+namespace branch {
+void
+b(PPU& ppu) {
+	const uint32_t cia{ ppu.reg.pc };
+	const uint32_t nia{ ppu.inst.BranchTargetLI(cia) };
+
+	if (ppu.inst.lk) {
+		ppu.reg.lr = cia + 4;
+	}
+
+	ppu.reg.pc = nia;
 }
 }
 
@@ -194,7 +230,7 @@ lwz(PPU& ppu) {
 	auto& gpr{ ppu.reg.gpr };
 	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
 	const uint64_t ea{ b + static_cast<int64_t>(static_cast<int16_t>(d)) };
-	
+
 	gpr[rd] = static_cast<uint64_t>(ppu.guestMem->Read32(static_cast<uint32_t>(ea)));
 }
 
@@ -313,7 +349,7 @@ ldux(PPU& ppu) {
 #pragma region fixed point store
 void
 stb(PPU& ppu) {
-	DEFINE_OPS(rs, ra, d);
+	DEFINE_OPS(rs, d, ra);
 	auto& gpr{ ppu.reg.gpr };
 	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
 	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
@@ -323,7 +359,7 @@ stb(PPU& ppu) {
 
 void
 stbu(PPU& ppu) {
-	DEFINE_OPS(rs, ra, d);
+	DEFINE_OPS(rs, d, ra);
 	auto& gpr{ ppu.reg.gpr };
 	const uint64_t b{ gpr[ra] };
 	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
@@ -355,7 +391,7 @@ stbux(PPU& ppu) {
 
 void
 sth(PPU& ppu) {
-	DEFINE_OPS(rs, ra, d);
+	DEFINE_OPS(rs, d, ra);
 	auto& gpr{ ppu.reg.gpr };
 	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
 	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
@@ -365,7 +401,7 @@ sth(PPU& ppu) {
 
 void
 sthu(PPU& ppu) {
-	DEFINE_OPS(rs, ra, d);
+	DEFINE_OPS(rs, d, ra);
 	auto& gpr{ ppu.reg.gpr };
 	const uint64_t b{ gpr[ra] };
 	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
@@ -397,7 +433,7 @@ sthux(PPU& ppu) {
 
 void
 stw(PPU& ppu) {
-	DEFINE_OPS(rs, ra, d);
+	DEFINE_OPS(rs, d, ra);
 	auto& gpr{ ppu.reg.gpr };
 	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
 	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
@@ -407,7 +443,7 @@ stw(PPU& ppu) {
 
 void
 stwu(PPU& ppu) {
-	DEFINE_OPS(rs, ra, d);
+	DEFINE_OPS(rs, d, ra);
 	auto& gpr{ ppu.reg.gpr };
 	const uint64_t b{ gpr[ra] };
 	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
@@ -480,7 +516,53 @@ stdux(PPU& ppu) {
 	gpr[ra] = ea;
 }
 #pragma endregion
-//fixed point arithmetic
+#pragma region fixed point load/store byte reversed
+void
+lhbrx(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = _byteswap_ushort(ppu.guestMem->Read16(static_cast<uint32_t>(ea)));
+}
+
+void
+lwbrx(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	gpr[rd] = _byteswap_ulong(ppu.guestMem->Read32(static_cast<uint32_t>(ea)));
+}
+
+void
+sthbrx(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write16(static_cast<uint32_t>(ea), _byteswap_ushort(static_cast<uint16_t>(gpr[rd])));
+}
+
+void
+stwbrx(PPU& ppu) {
+	DEFINE_OPS(rd, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write32(static_cast<uint32_t>(ea), _byteswap_ulong(static_cast<uint32_t>(gpr[rd])));
+}
+
+#pragma endregion
+#pragma region fixed point arithmetic - check all insts!!!!
 void
 addi(PPU& ppu) {
 	DEFINE_OPS(rd, ra, simm);
@@ -597,9 +679,37 @@ subf(PPU& ppu) {
 	}
 }
 
+#pragma endregion
+#pragma region fixed point logical
+void
+andi(PPU& ppu) {
+	DEFINE_OPS(ra, rs, uimm);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t s{ gpr[rs] };
+	const uint64_t ui{ static_cast<uint64_t>(static_cast<uint16_t>(uimm)) };
+	const uint64_t r{ s & ui };
+
+	gpr[ra] = r;
+
+	cr::setCRFixedPoint(ppu, static_cast<int64_t>(r), (ppu.reg.xer & XER_SO) != 0);
+}
+
+void
+andis(PPU& ppu) {
+	DEFINE_OPS(ra, rs, uimm);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t s{ gpr[rs] };
+	const uint64_t ui{ static_cast<uint64_t>(static_cast<uint16_t>(uimm)) << 16 };
+	const uint64_t r{ s & ui };
+
+	gpr[ra] = r;
+
+	cr::setCRFixedPoint(ppu, static_cast<int64_t>(r), (ppu.reg.xer & XER_SO) != 0);
+}
+
 void
 ori(PPU& ppu) {
-	DEFINE_OPS(rs, ra, uimm);
+	DEFINE_OPS(ra, rs, uimm);
 	auto& gpr{ ppu.reg.gpr };
 	const uint64_t s{ gpr[rs] };
 	const uint64_t ui{ static_cast<uint64_t>(static_cast<uint16_t>(uimm)) };
@@ -610,7 +720,7 @@ ori(PPU& ppu) {
 
 void
 oris(PPU& ppu) {
-	DEFINE_OPS(rs, ra, uimm);
+	DEFINE_OPS(ra, rs, uimm);
 	auto& gpr{ ppu.reg.gpr };
 	const uint64_t s{ gpr[rs] };
 	const uint64_t ui{ static_cast<uint64_t>(static_cast<uint16_t>(uimm)) << 16 };
@@ -618,6 +728,349 @@ oris(PPU& ppu) {
 
 	gpr[ra] = r;
 }
+
+void
+xori(PPU& ppu) {
+	DEFINE_OPS(ra, rs, uimm);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t s{ gpr[rs] };
+	const uint64_t ui{ static_cast<uint64_t>(static_cast<uint16_t>(uimm)) };
+	const uint64_t r{ s ^ ui };
+
+	gpr[ra] = r;
+}
+
+void
+xoris(PPU& ppu) {
+	DEFINE_OPS(ra, rs, uimm);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t s{ gpr[rs] };
+	const uint64_t ui{ static_cast<uint64_t>(static_cast<uint16_t>(uimm)) << 16 };
+	const uint64_t r{ s ^ ui };
+
+	gpr[ra] = r;
+}
+
+void
+andx(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ gpr[rs] & gpr[rb] };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+orx(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ gpr[rs] | gpr[rb] };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+xorx(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ gpr[rs] ^ gpr[rb] };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+nand(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ ~(gpr[rs] & gpr[rb]) };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+nor(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ ~(gpr[rs] | gpr[rb]) };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+andc(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ gpr[rs] & ~gpr[rb] };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+eqv(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ ~(gpr[rs] ^ gpr[rb]) };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+orc(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ gpr[rs] | ~gpr[rb] };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+extsb(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ static_cast<uint64_t>(static_cast<int64_t>(static_cast<int8_t>(gpr[rs]))) };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+extsh(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(gpr[rs]))) };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+extsw(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ static_cast<uint64_t>(static_cast<int64_t>(static_cast<int32_t>(gpr[rs]))) };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+cntlzd(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ __lzcnt64(gpr[rs]) };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+cntlzw(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ __lzcnt(static_cast<uint32_t>(gpr[rs])) };
+
+	gpr[ra] = r;
+
+	cr::updateRc(ppu, r);
+}
+
+void
+popcntb(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+
+	uint64_t x{ gpr[rs] };
+	x = x - ((x >> 1) & 0x5555555555555555ull);
+	x = (x & 0x3333333333333333ull) + ((x >> 2) & 0x3333333333333333ull);
+	x = (x + (x >> 4)) & 0x0F0F0F0F0F0F0F0Full;
+
+	gpr[ra] = x;
+}
+
+#pragma endregion
+#pragma region fixed point rotate and shift
+void
+rlwinm(PPU& ppu) {
+	DEFINE_OPS(ra, rs, sh, mb, me);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t r{ rot::rotl32dup(gpr[rs], sh) & rot::mask64(mb + 32, me + 32) };
+
+	gpr[ra] = r;
+	cr::updateRc(ppu, r);
+}
+
+void
+rlwnm(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb, mb, me);
+	auto& gpr{ ppu.reg.gpr };
+	const uint32_t n{ static_cast<uint32_t>(gpr[rb] & 0x1F) };
+	const uint64_t r{ rot::rotl32dup(gpr[rs], n) & rot::mask64(mb + 32, me + 32) };
+
+	gpr[ra] = r;
+	cr::updateRc(ppu, r);
+}
+
+void
+rlwimi(PPU& ppu) {
+	DEFINE_OPS(ra, rs, sh, mb, me);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t m{ rot::mask64(mb + 32, me + 32) };
+	const uint64_t r{ (rot::rotl32dup(gpr[rs], sh) & m) | (gpr[ra] & ~m) };
+
+	gpr[ra] = r;
+	cr::updateRc(ppu, r);
+}
+
+void
+rldicl(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint32_t sh{ ppu.inst.Sh64() };
+	const uint32_t mb{ ppu.inst.Mb64() };
+	const uint64_t r{ std::rotl(gpr[rs], static_cast<int32_t>(sh)) & rot::mask64(mb, 63) };
+
+	gpr[ra] = r;
+	cr::updateRc(ppu, r);
+}
+
+void
+rldicr(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint32_t sh{ ppu.inst.Sh64() };
+	const uint32_t me{ ppu.inst.Me64() };
+	const uint64_t r{ std::rotl(gpr[rs], static_cast<int32_t>(sh)) & rot::mask64(0, me) };
+
+	gpr[ra] = r;
+	cr::updateRc(ppu, r);
+}
+
+void
+rldic(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint32_t sh{ ppu.inst.Sh64() };
+	const uint32_t mb{ ppu.inst.Mb64() };
+	const uint64_t r{ std::rotl(gpr[rs], static_cast<int32_t>(sh)) & rot::mask64(mb, 63 - sh) };
+
+	gpr[ra] = r;
+	cr::updateRc(ppu, r);
+}
+
+void
+rldimi(PPU& ppu) {
+	DEFINE_OPS(ra, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint32_t sh{ ppu.inst.Sh64() };
+	const uint32_t mb{ ppu.inst.Mb64() };
+	const uint64_t m{ rot::mask64(mb, 63 - sh) };
+	const uint64_t r{ (std::rotl(gpr[rs], static_cast<int32_t>(sh)) & m) | (gpr[ra] & ~m) };
+
+	gpr[ra] = r;
+	cr::updateRc(ppu, r);
+}
+
+void
+rldcl(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint32_t n{ static_cast<uint32_t>(gpr[rb] & 0x3F) };
+	const uint32_t mb{ ppu.inst.Mb64() };
+	const uint64_t r{ std::rotl(gpr[rs], static_cast<int32_t>(n)) & rot::mask64(mb, 63) };
+
+	gpr[ra] = r;
+	cr::updateRc(ppu, r);
+}
+
+void
+rldcr(PPU& ppu) {
+	DEFINE_OPS(ra, rs, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint32_t n{ static_cast<uint32_t>(gpr[rb] & 0x3F) };
+	const uint32_t me{ ppu.inst.Me64() };
+	const uint64_t r{ std::rotl(gpr[rs], static_cast<int32_t>(n)) & rot::mask64(0, me) };
+
+	gpr[ra] = r;
+	cr::updateRc(ppu, r);
+}
+
+#pragma endregion
+#pragma region move to/from system registers
+void
+mtspr(PPU& ppu) {
+	DEFINE_OPS(spr, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t n{ ppu.inst.Spr() };
+	constexpr uint64_t XER_MASK{ 0xE000007Full };
+
+	switch (n) {
+	case 1:   ppu.reg.xer = gpr[rs] & XER_MASK; break;
+	case 8:   ppu.reg.lr = gpr[rs]; break;
+	case 9:   ppu.reg.ctr = gpr[rs]; break;
+	case 256: ppu.reg.vrsave = static_cast<uint32_t>(gpr[rs]); break;
+	default: break;
+	}
+}
+
+void
+mfspr(PPU& ppu) {
+	DEFINE_OPS(spr, rs);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t n{ ppu.inst.Spr() };
+	constexpr uint64_t XER_MASK{ 0xE000007Full };
+
+	switch (n) {
+	case 1:   gpr[rs] = ppu.reg.xer & XER_MASK; break;
+	case 8:   gpr[rs] = ppu.reg.lr; break;
+	case 9:   gpr[rs] = ppu.reg.ctr; break;
+	case 256: gpr[rs] = ppu.reg.vrsave; break;
+	default: break;
+	}
+}
+
+void
+mtcrf(PPU& ppu) {
+	DEFINE_OPS(crm, rs);
+	auto& gpr{ ppu.reg.gpr };
+
+	uint32_t mask{ 0 };
+	for (uint32_t i{ 0 }; i < 8; ++i) {
+		if (crm & (0x80u >> i)) {
+			mask |= 0xFu << (28 - 4 * i);
+		}
+	}
+
+	const uint32_t value{ static_cast<uint32_t>(gpr[rs]) };
+	ppu.reg.cr = (ppu.reg.cr & ~mask) | (value & mask);
+}
+
+void
+mfcr(PPU& ppu) {
+	DEFINE_OPS(rd);
+	ppu.reg.gpr[rd] = static_cast<uint64_t>(ppu.reg.cr);
+}
+
+#pragma endregion
 }
 
 constexpr static instructionOp insts[197]{
@@ -634,16 +1087,16 @@ constexpr static instructionOp insts[197]{
 	fixedp::addis,	//10
 	nullptr,	//11
 	nullptr,	//12
-	nullptr,	//13
-	nullptr,	//14
-	nullptr,	//15
-	nullptr,	//16
+	branch::b,		//13
+	fixedp::rlwimi,	//14
+	fixedp::rlwinm,	//15
+	fixedp::rlwnm,	//16
 	fixedp::ori,	//17
 	fixedp::oris,	//18
-	nullptr,	//19
-	nullptr,	//20
-	nullptr,	//21
-	nullptr,	//22
+	fixedp::xori,	//19
+	fixedp::xoris,	//20
+	fixedp::andi,	//21
+	fixedp::andis,	//22
 	fixedp::lwz,	//23
 	fixedp::lwzu,	//24
 	fixedp::lbz,	//25
@@ -684,12 +1137,12 @@ constexpr static instructionOp insts[197]{
 	nullptr,	//60
 	nullptr,	//61
 	nullptr,	//62
-	nullptr,	//63
-	nullptr,	//64
-	nullptr,	//65
-	nullptr,	//66
-	nullptr,	//67
-	nullptr,	//68
+	fixedp::rldicl,	//63
+	fixedp::rldicr,	//64
+	fixedp::rldic,	//65
+	fixedp::rldimi,	//66
+	fixedp::rldcl,	//67
+	fixedp::rldcr,	//68
 	nullptr,	//69
 	nullptr,	//70
 	nullptr,	//71
@@ -714,10 +1167,10 @@ constexpr static instructionOp insts[197]{
 	fixedp::stwux,	//90
 	fixedp::stdx,	//91
 	fixedp::stdux,	//92
-	nullptr,	//93
-	nullptr,	//94
-	nullptr,	//95
-	nullptr,	//96
+	fixedp::lhbrx,	//93
+	fixedp::lwbrx,	//94
+	fixedp::sthbrx,	//95
+	fixedp::stwbrx,	//96
 	nullptr,	//97
 	nullptr,	//98
 	nullptr,	//99
@@ -743,19 +1196,19 @@ constexpr static instructionOp insts[197]{
 	nullptr,	//119
 	nullptr,	//120
 	nullptr,	//121
-	nullptr,	//122
-	nullptr,	//123
-	nullptr,	//124
-	nullptr,	//125
-	nullptr,	//126
-	nullptr,	//127
-	nullptr,	//128
-	nullptr,	//129
-	nullptr,	//130
-	nullptr,	//131
-	nullptr,	//132
-	nullptr,	//133
-	nullptr,	//134
+	fixedp::andx,	//122
+	fixedp::andc,	//123
+	fixedp::orx,	//124
+	fixedp::orc,	//125
+	fixedp::xorx,	//126
+	fixedp::nand,	//127
+	fixedp::nor,	//128
+	fixedp::eqv,	//129
+	fixedp::extsb,	//130
+	fixedp::extsh,	//131
+	fixedp::extsw,	//132
+	fixedp::cntlzw,	//133
+	fixedp::cntlzd,	//134
 	nullptr,	//135
 	nullptr,	//136
 	nullptr,	//137
@@ -764,10 +1217,10 @@ constexpr static instructionOp insts[197]{
 	nullptr,	//140
 	nullptr,	//141
 	nullptr,	//142
-	nullptr,	//143
-	nullptr,	//144
-	nullptr,	//145
-	nullptr,	//146
+	fixedp::mtspr,	//143
+	fixedp::mfspr,	//144
+	fixedp::mfcr,	//145
+	fixedp::mtcrf,	//146
 	nullptr,	//147
 	nullptr,	//148
 	nullptr,	//149
@@ -822,7 +1275,7 @@ constexpr static instructionOp insts[197]{
 
 static_assert(static_cast<size_t>(InstMnemonic::Mtfsb1) == _countof(insts));
 
-void
+bool
 PPUCycle(
 	PPU& ppu) {
 	ppu.inst = ppu.guestMem->Read32(ppu.reg.pc);
@@ -835,13 +1288,18 @@ PPUCycle(
 
 	if (!DecodeInstruction(ppu.inst, ppu.instData)) {
 		printf("Failed to decode instruction!\n");
-		return;
+		return false;
 	}
 
 	PPUFetchOperands(ppu);
 
 	const instructionOp op{ insts[static_cast<uint32_t>(ppu.instData.mnemonic)] };
-	if (!op) return;
+	if (!op) {
+		printf("Above instruction is not implemented!");
+		return false;
+	}
 
 	op(ppu);
+
+	return true;
 }

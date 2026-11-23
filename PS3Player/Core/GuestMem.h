@@ -11,7 +11,7 @@ struct MemRange {
 
 struct GuestMem {
 	static constexpr uint64_t	kSize{ 1ull << 32 };
-	uint8_t*					base{ nullptr };
+	uint8_t* base{ nullptr };
 	std::vector<MemRange>		ranges;
 
 	bool Init() {
@@ -34,8 +34,8 @@ struct GuestMem {
 	}
 
 	bool Map(
-		uint32_t addr, 
-		uint64_t size, 
+		uint32_t addr,
+		uint64_t size,
 		bool exec) {
 		const uint64_t end{ uint64_t(addr) + size };
 		if (end > kSize) return false;
@@ -50,12 +50,12 @@ struct GuestMem {
 	}
 
 	bool IsMapped(
-		uint32_t addr, 
+		uint32_t addr,
 		uint32_t size) const {
 		const uint64_t end{ uint64_t(addr) + size };
 		for (const MemRange& r : ranges)
 			if (addr >= r.start && end <= r.end) return true;
-		
+
 		return false;
 	}
 
@@ -63,34 +63,55 @@ struct GuestMem {
 		uint32_t addr) const {
 		for (const MemRange& r : ranges)
 			if (addr >= r.start && addr < r.end) return r.exec;
-	
+
 		return false;
 	}
 
 	uint8_t Read8(
 		uint32_t addr) const {
 		const uint8_t* p{ base + addr };
+#if _DEBUG
+		if (!IsMapped(addr, sizeof(uint8_t))) {
+			printf("Invalid read/write!\n");
+			return 0;
+		}
+#endif
 		return p[0];
 	}
 
 	uint16_t Read16(
 		uint32_t addr) const {
 		const uint8_t* p{ base + addr };
-
+#if _DEBUG
+		if (!IsMapped(addr, sizeof(uint16_t))) {
+			printf("Invalid read/write!\n");
+			return 0;
+		}
+#endif
 		return uint16_t((uint16_t(p[0]) << 8) | p[1]);
 	}
-	
+
 	uint32_t Read32(
 		uint32_t addr) const {
 		const uint8_t* p{ base + addr };
-		
+#if _DEBUG
+		if (!IsMapped(addr, sizeof(uint32_t))) {
+			printf("Invalid read/write!\n");
+			return 0;
+		}
+#endif
 		return (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) | (uint32_t(p[2]) << 8) | p[3];
 	}
 
 	uint64_t Read64(
 		uint32_t addr) const {
 		const uint8_t* p{ base + addr };
-
+#if _DEBUG
+		if (!IsMapped(addr, sizeof(uint64_t))) {
+			printf("Invalid read/write!\n");
+			return 0;
+		}
+#endif
 		return (uint64_t(p[0]) << 56) | (uint64_t(p[1]) << 48) | (uint64_t(p[2]) << 40) | (uint64_t(p[3]) << 32)
 			| (uint64_t(p[4]) << 24) | (uint64_t(p[5]) << 16) | (uint64_t(p[6]) << 8) | p[7];
 	}
@@ -99,6 +120,12 @@ struct GuestMem {
 		uint32_t addr,
 		uint8_t v) {
 		uint8_t* p{ base + addr };
+#if _DEBUG
+		if (!IsMapped(addr, sizeof(uint64_t))) {
+			printf("Invalid read/write!\n");
+			return;
+		}
+#endif
 		p[0] = v;
 	}
 
@@ -106,13 +133,25 @@ struct GuestMem {
 		uint32_t addr,
 		uint16_t v) {
 		uint8_t* p{ base + addr };
+#if _DEBUG
+		if (!IsMapped(addr, sizeof(uint64_t))) {
+			printf("Invalid read/write!\n");
+			return;
+		}
+#endif
 		p[0] = uint8_t(v >> 8); p[1] = uint8_t(v);
 	}
 
 	void Write32(
-		uint32_t addr, 
+		uint32_t addr,
 		uint32_t v) {
 		uint8_t* p{ base + addr };
+#if _DEBUG
+		if (!IsMapped(addr, sizeof(uint64_t))) {
+			printf("Invalid read/write!\n");
+			return;
+		}
+#endif
 		p[0] = uint8_t(v >> 24); p[1] = uint8_t(v >> 16); p[2] = uint8_t(v >> 8); p[3] = uint8_t(v);
 	}
 
@@ -120,6 +159,12 @@ struct GuestMem {
 		uint32_t addr,
 		uint64_t v) {
 		uint8_t* p{ base + addr };
+#if _DEBUG
+		if (!IsMapped(addr, sizeof(uint64_t))) {
+			printf("Invalid read/write!\n");
+			return;
+		}
+#endif
 		p[0] = uint8_t(v >> 56); p[1] = uint8_t(v >> 48); p[2] = uint8_t(v >> 40); p[3] = uint8_t(v >> 32);
 		p[4] = uint8_t(v >> 24); p[5] = uint8_t(v >> 16); p[6] = uint8_t(v >> 8);  p[7] = uint8_t(v);
 	}

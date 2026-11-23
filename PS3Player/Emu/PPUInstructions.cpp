@@ -41,17 +41,17 @@ const InstData& selectOpCode13(const InstField& field) {
 	return gOpCode13[field.xo10];
 }
 
-constexpr static InstData gOpCode1E[] {
-	{ InstMnemonic::Rldicl,	 { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//rldicl RA,RS,SH,MB	(Rc=0)
-	{ InstMnemonic::Rldicl,	 { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//rldicl RA,RS,SH,MB	(Rc=1)
-	{ InstMnemonic::Rldicr,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::ME } },	//rldicr RA,RS,SH,ME	(Rc=0)
-	{ InstMnemonic::Rldicr,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::ME } },	//rldicr RA,RS,SH,ME	(Rc=1)
-	{ InstMnemonic::Rldic,   { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//rldic  RA,RS,SH,MB	(Rc=0)
-	{ InstMnemonic::Rldic,   { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//rldic  RA,RS,SH,MB	(Rc=1)
-	{ InstMnemonic::Rldimi,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//rldimi RA,RS,SH,MB	(Rc=0)
-	{ InstMnemonic::Rldimi,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//rldimi RA,RS,SH,MB	(Rc=1)
-	{ InstMnemonic::Rldcr,   { InstOperand::RA, InstOperand::RS, InstOperand::RB, InstOperand::ME } },	//rldcr RA,RS,RB,ME		(Rc=0)
-	{ InstMnemonic::Rldcr,   { InstOperand::RA, InstOperand::RS, InstOperand::RB, InstOperand::ME } },	//rldcr RA,RS,RB,ME		(Rc=1)
+constexpr static InstData gOpCode1E[]{
+	{ InstMnemonic::Rldicl,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//0: rldicl RA,RS,SH,MB	(sh5=0)
+	{ InstMnemonic::Rldicl,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//1: rldicl RA,RS,SH,MB	(sh5=1)
+	{ InstMnemonic::Rldicr,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::ME } },	//2: rldicr RA,RS,SH,ME	(sh5=0)
+	{ InstMnemonic::Rldicr,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::ME } },	//3: rldicr RA,RS,SH,ME	(sh5=1)
+	{ InstMnemonic::Rldic,   { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//4: rldic  RA,RS,SH,MB	(sh5=0)
+	{ InstMnemonic::Rldic,   { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//5: rldic  RA,RS,SH,MB	(sh5=1)
+	{ InstMnemonic::Rldimi,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//6: rldimi RA,RS,SH,MB	(sh5=0)
+	{ InstMnemonic::Rldimi,  { InstOperand::RA, InstOperand::RS, InstOperand::SH, InstOperand::MB } },	//7: rldimi RA,RS,SH,MB	(sh5=1)
+	{ InstMnemonic::Rldcl,   { InstOperand::RA, InstOperand::RS, InstOperand::RB, InstOperand::MB } },	//8: rldcl  RA,RS,RB,MB
+	{ InstMnemonic::Rldcr,   { InstOperand::RA, InstOperand::RS, InstOperand::RB, InstOperand::ME } },	//9: rldcr  RA,RS,RB,ME
 };
 
 const InstData& selectOpCode1E(const InstField& field) {

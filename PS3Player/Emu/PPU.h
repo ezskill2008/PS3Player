@@ -13,6 +13,7 @@ struct PPURegisters {
 	uint64_t	lr{ 0 };
 	uint64_t	ctr{ 0 };
 	uint64_t	xer{ 0 };
+	uint32_t	vrsave{ 0 };
 	uint32_t	pc{ 0 };
 
 	inline double GetFprDouble(int i) const { return std::bit_cast<double>(fpr[i]); }
@@ -27,5 +28,5 @@ struct PPU {
 	uint64_t		operands[5]{};
 };
 
-void PPUCycle(
+bool PPUCycle(
 	PPU& ppu);
