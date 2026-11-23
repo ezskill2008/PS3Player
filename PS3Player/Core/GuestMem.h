@@ -5,12 +5,12 @@
 
 struct MemRange {
 	uint32_t start{ 0 };
-	uint32_t end{ 0 };
+	uint64_t end{ 0 };
 	bool     exec{ false };
 };
 
 struct GuestMem {
-	static constexpr uint64_t	kSize{ 1ull << 26 };
+	static constexpr uint64_t	kSize{ 1ull << 32 };
 	uint8_t*					base{ nullptr };
 	std::vector<MemRange>		ranges;
 
@@ -44,7 +44,7 @@ struct GuestMem {
 		const uint64_t s{ addr & ~0xFFFull };
 		const uint64_t e{ (end + 0xFFF) & ~0xFFFull };
 		if (!VirtualAlloc(base + s, size_t(e - s), MEM_COMMIT, PAGE_READWRITE)) return false;
-		ranges.push_back({ addr, uint32_t(end), exec });
+		ranges.push_back({ addr, end, exec });
 
 		return true;
 	}

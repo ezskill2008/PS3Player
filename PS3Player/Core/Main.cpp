@@ -134,13 +134,16 @@ int main() {
 	//DissassemblyOptions dissOptions{};
 	//dissOptions.includePc = false;
 	//dissOptions.nonFollowOps = 256;
-
+	
 	//OutputDissassemblyToStdOut(prg, mem, dissOptions);
 
 	PPU ppu{};
 	ppu.reg.pc = prg.opd.entryPc;
+	ppu.reg.gpr[1] = (static_cast<uint64_t>(0xD0000000) + procParams.primaryStackSize - 0x200) & ~0xFull;
 	ppu.reg.gpr[2] = static_cast<uint64_t>(prg.opd.toc);
+	
 	ppu.guestMem = &mem;
+	ppu.guestMem->Map(static_cast<uint32_t>(ppu.reg.gpr[1]), procParams.primaryStackSize, false);
 
 	for (uint32_t i{ 0 };i < 10;++i) {
 		PPUCycle(ppu);

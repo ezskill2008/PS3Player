@@ -310,8 +310,133 @@ ldux(PPU& ppu) {
 }
 
 #pragma endregion
+#pragma region fixed point store
+void
+stb(PPU& ppu) {
+	DEFINE_OPS(rs, ra, d);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
 
-//fixed point store
+	ppu.guestMem->Write8(static_cast<uint32_t>(ea), static_cast<uint8_t>(gpr[rs]));
+}
+
+void
+stbu(PPU& ppu) {
+	DEFINE_OPS(rs, ra, d);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
+
+	ppu.guestMem->Write8(static_cast<uint32_t>(ea), static_cast<uint8_t>(gpr[rs]));
+	gpr[ra] = ea;
+}
+
+void
+stbx(PPU& ppu) {
+	DEFINE_OPS(rs, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write8(static_cast<uint32_t>(ea), static_cast<uint8_t>(gpr[rs]));
+}
+
+void
+stbux(PPU& ppu) {
+	DEFINE_OPS(rs, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write8(static_cast<uint32_t>(ea), static_cast<uint8_t>(gpr[rs]));
+	gpr[ra] = ea;
+}
+
+void
+sth(PPU& ppu) {
+	DEFINE_OPS(rs, ra, d);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
+
+	ppu.guestMem->Write16(static_cast<uint32_t>(ea), static_cast<uint16_t>(gpr[rs]));
+}
+
+void
+sthu(PPU& ppu) {
+	DEFINE_OPS(rs, ra, d);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
+
+	ppu.guestMem->Write16(static_cast<uint32_t>(ea), static_cast<uint16_t>(gpr[rs]));
+	gpr[ra] = ea;
+}
+
+void
+sthx(PPU& ppu) {
+	DEFINE_OPS(rs, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write16(static_cast<uint32_t>(ea), static_cast<uint16_t>(gpr[rs]));
+}
+
+void
+sthux(PPU& ppu) {
+	DEFINE_OPS(rs, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write16(static_cast<uint32_t>(ea), static_cast<uint16_t>(gpr[rs]));
+	gpr[ra] = ea;
+}
+
+void
+stw(PPU& ppu) {
+	DEFINE_OPS(rs, ra, d);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
+
+	ppu.guestMem->Write32(static_cast<uint32_t>(ea), static_cast<uint32_t>(gpr[rs]));
+}
+
+void
+stwu(PPU& ppu) {
+	DEFINE_OPS(rs, ra, d);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int16_t>(d))) };
+
+	ppu.guestMem->Write32(static_cast<uint32_t>(ea), static_cast<uint32_t>(gpr[rs]));
+	gpr[ra] = ea;
+}
+
+void
+stwx(PPU& ppu) {
+	DEFINE_OPS(rs, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write32(static_cast<uint32_t>(ea), static_cast<uint32_t>(gpr[rs]));
+}
+
+void
+stwux(PPU& ppu) {
+	DEFINE_OPS(rs, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write32(static_cast<uint32_t>(ea), static_cast<uint32_t>(gpr[rs]));
+	gpr[ra] = ea;
+}
+
 void
 std(PPU& ppu) {
 	DEFINE_OPS(rs, ra, ds);
@@ -333,6 +458,28 @@ stdu(PPU& ppu) {
 	gpr[ra] = ea;
 }
 
+
+void
+stdx(PPU& ppu) {
+	DEFINE_OPS(rs, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ ra == 0 ? 0 : gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write64(static_cast<uint32_t>(ea), gpr[rs]);
+}
+
+void
+stdux(PPU& ppu) {
+	DEFINE_OPS(rs, ra, rb);
+	auto& gpr{ ppu.reg.gpr };
+	const uint64_t b{ gpr[ra] };
+	const uint64_t ea{ b + gpr[rb] };
+
+	ppu.guestMem->Write64(static_cast<uint32_t>(ea), gpr[rs]);
+	gpr[ra] = ea;
+}
+#pragma endregion
 //fixed point arithmetic
 void
 addi(PPU& ppu) {
@@ -474,203 +621,203 @@ oris(PPU& ppu) {
 }
 
 constexpr static instructionOp insts[197]{
-    nullptr,//0
-    nullptr,//1
-	nullptr,//2
-	nullptr,//3
-	nullptr,//4
-	nullptr,//5
-	nullptr,//6
-	fixedp::addic,//7
-	fixedp::addicd,//8
-	fixedp::addi,//9
-	fixedp::addis,//10
-	nullptr,//11
-	nullptr,//12
-	nullptr,//13
-	nullptr,//14
-	nullptr,//15
-	nullptr,//16
-	fixedp::ori,//17
-	fixedp::oris,//18
-	nullptr,//19
-	nullptr,//20
-	nullptr,//21
-	nullptr,//22
-	fixedp::lwz,//23
-	nullptr,//24
-	nullptr,//25
-	nullptr,//26
-	nullptr,//27
-	nullptr,//28
-	nullptr,//29
-	nullptr,//30
-	nullptr,//31
-	nullptr,//32
-	nullptr,//33
-	nullptr,//34
-	nullptr,//35
-	nullptr,//36
-	nullptr,//37
-	nullptr,//38
-	nullptr,//39
-	nullptr,//40
-	nullptr,//41
-	nullptr,//42
-	nullptr,//43
-	nullptr,//44
-	nullptr,//45
-	nullptr,//46
-	nullptr,//47
-	nullptr,//48
-	nullptr,//49
-	nullptr,//50
-	nullptr,//51
-	nullptr,//52
-	nullptr,//53
-	nullptr,//54
-	nullptr,//55
-	nullptr,//56
-	nullptr,//57
-	nullptr,//58
-	nullptr,//59
-	nullptr,//60
-	nullptr,//61
-	nullptr,//62
-	nullptr,//63
-	nullptr,//64
-	nullptr,//65
-	nullptr,//66
-	nullptr,//67
-	nullptr,//68
-	nullptr,//69
-	nullptr,//70
-	nullptr,//71
-	nullptr,//72
-	nullptr,//73
-	nullptr,//74
-	nullptr,//75
-	nullptr,//76
-	nullptr,//77
-	nullptr,//78
-	nullptr,//79
-	nullptr,//80
-	nullptr,//81
-	nullptr,//82
-	nullptr,//83
-	nullptr,//84
-	nullptr,//85
-	nullptr,//86
-	nullptr,//87
-	nullptr,//88
-	nullptr,//89
-	nullptr,//90
-	nullptr,//91
-	nullptr,//92
-	nullptr,//93
-	nullptr,//94
-	nullptr,//95
-	nullptr,//96
-	nullptr,//97
-	nullptr,//98
-	nullptr,//99
-	nullptr,//100
-	fixedp::add,//101
-	nullptr,//102
-	nullptr,//103
-	nullptr,//104
-	nullptr,//105
-	fixedp::subf,//106
-	nullptr,//107
-	nullptr,//108
-	nullptr,//109
-	nullptr,//110
-	nullptr,//111
-	nullptr,//112
-	nullptr,//113
-	nullptr,//114
-	nullptr,//115
-	nullptr,//116
-	nullptr,//117
-	nullptr,//118
-	nullptr,//119
-	nullptr,//120
-	nullptr,//121
-	nullptr,//122
-	nullptr,//123
-	nullptr,//124
-	nullptr,//125
-	nullptr,//126
-	nullptr,//127
-	nullptr,//128
-	nullptr,//129
-	nullptr,//130
-	nullptr,//131
-	nullptr,//132
-	nullptr,//133
-	nullptr,//134
-	nullptr,//135
-	nullptr,//136
-	nullptr,//137
-	nullptr,//138
-	nullptr,//139
-	nullptr,//140
-	nullptr,//141
-	nullptr,//142
-	nullptr,//143
-	nullptr,//144
-	nullptr,//145
-	nullptr,//146
-	nullptr,//147
-	nullptr,//148
-	nullptr,//149
-	nullptr,//150
-	nullptr,//151
-	nullptr,//152
-	nullptr,//153
-	nullptr,//154
-	nullptr,//155
-	nullptr,//156
-	nullptr,//157
-	nullptr,//158
-	nullptr,//159
-	nullptr,//160
-	nullptr,//161
-	nullptr,//162
-	nullptr,//163
-	nullptr,//164
-	nullptr,//165
-	nullptr,//166
-	nullptr,//167
-	nullptr,//168
-	nullptr,//169
-	nullptr,//170
-	nullptr,//171
-	nullptr,//172
-	nullptr,//173
-	nullptr,//174
-	nullptr,//175
-	nullptr,//176
-	nullptr,//177
-	nullptr,//178
-	nullptr,//179
-	nullptr,//180
-	nullptr,//181
-	nullptr,//182
-	nullptr,//183
-	nullptr,//184
-	nullptr,//185
-	nullptr,//186
-	nullptr,//187
-	nullptr,//188
-	nullptr,//189
-	nullptr,//190
-	nullptr,//191
-	nullptr,//192
-	nullptr,//193
-	nullptr,//194
-	nullptr,//195
-	nullptr,//196
+	nullptr,	//0
+	nullptr,	//1
+	nullptr,	//2
+	nullptr,	//3
+	nullptr,	//4
+	nullptr,	//5
+	nullptr,	//6
+	fixedp::addic,	//7
+	fixedp::addicd,	//8
+	fixedp::addi,	//9
+	fixedp::addis,	//10
+	nullptr,	//11
+	nullptr,	//12
+	nullptr,	//13
+	nullptr,	//14
+	nullptr,	//15
+	nullptr,	//16
+	fixedp::ori,	//17
+	fixedp::oris,	//18
+	nullptr,	//19
+	nullptr,	//20
+	nullptr,	//21
+	nullptr,	//22
+	fixedp::lwz,	//23
+	fixedp::lwzu,	//24
+	fixedp::lbz,	//25
+	fixedp::lbzu,	//26
+	fixedp::stw,	//27
+	fixedp::stwu,	//28
+	fixedp::stb,	//29
+	fixedp::stbu,	//30
+	fixedp::lhz,	//31
+	fixedp::lhzu,	//32
+	fixedp::lha,	//33
+	fixedp::lhau,	//34
+	fixedp::sth,	//35
+	fixedp::sthu,	//36
+	nullptr,	//37
+	nullptr,	//38
+	nullptr,	//39
+	nullptr,	//40
+	nullptr,	//41
+	nullptr,	//42
+	nullptr,	//43
+	nullptr,	//44
+	nullptr,	//45
+	nullptr,	//46
+	fixedp::ld,		//47
+	fixedp::ldu,	//48
+	fixedp::lwa,	//49
+	fixedp::std,	//50
+	fixedp::stdu,	//51
+	nullptr,	//52
+	nullptr,	//53
+	nullptr,	//54
+	nullptr,	//55
+	nullptr,	//56
+	nullptr,	//57
+	nullptr,	//58
+	nullptr,	//59
+	nullptr,	//60
+	nullptr,	//61
+	nullptr,	//62
+	nullptr,	//63
+	nullptr,	//64
+	nullptr,	//65
+	nullptr,	//66
+	nullptr,	//67
+	nullptr,	//68
+	nullptr,	//69
+	nullptr,	//70
+	nullptr,	//71
+	nullptr,	//72
+	fixedp::lbzx,	//73
+	fixedp::lbzux,	//74
+	fixedp::lhzx,	//75
+	fixedp::lhzux,	//76
+	fixedp::lhax,	//77
+	fixedp::lhaux,	//78
+	fixedp::lwzx,	//79
+	fixedp::lwzux,	//80
+	fixedp::lwax,	//81
+	fixedp::lwaux,	//82
+	fixedp::ldx,	//83
+	fixedp::ldux,	//84
+	fixedp::stbx,	//85
+	fixedp::stbux,	//86
+	fixedp::sthx,	//87
+	fixedp::sthux,	//88
+	fixedp::stwx,	//89
+	fixedp::stwux,	//90
+	fixedp::stdx,	//91
+	fixedp::stdux,	//92
+	nullptr,	//93
+	nullptr,	//94
+	nullptr,	//95
+	nullptr,	//96
+	nullptr,	//97
+	nullptr,	//98
+	nullptr,	//99
+	nullptr,	//100
+	fixedp::add,	//101
+	nullptr,	//102
+	nullptr,	//103
+	nullptr,	//104
+	nullptr,	//105
+	fixedp::subf,	//106
+	nullptr,	//107
+	nullptr,	//108
+	nullptr,	//109
+	nullptr,	//110
+	nullptr,	//111
+	nullptr,	//112
+	nullptr,	//113
+	nullptr,	//114
+	nullptr,	//115
+	nullptr,	//116
+	nullptr,	//117
+	nullptr,	//118
+	nullptr,	//119
+	nullptr,	//120
+	nullptr,	//121
+	nullptr,	//122
+	nullptr,	//123
+	nullptr,	//124
+	nullptr,	//125
+	nullptr,	//126
+	nullptr,	//127
+	nullptr,	//128
+	nullptr,	//129
+	nullptr,	//130
+	nullptr,	//131
+	nullptr,	//132
+	nullptr,	//133
+	nullptr,	//134
+	nullptr,	//135
+	nullptr,	//136
+	nullptr,	//137
+	nullptr,	//138
+	nullptr,	//139
+	nullptr,	//140
+	nullptr,	//141
+	nullptr,	//142
+	nullptr,	//143
+	nullptr,	//144
+	nullptr,	//145
+	nullptr,	//146
+	nullptr,	//147
+	nullptr,	//148
+	nullptr,	//149
+	nullptr,	//150
+	nullptr,	//151
+	nullptr,	//152
+	nullptr,	//153
+	nullptr,	//154
+	nullptr,	//155
+	nullptr,	//156
+	nullptr,	//157
+	nullptr,	//158
+	nullptr,	//159
+	nullptr,	//160
+	nullptr,	//161
+	nullptr,	//162
+	nullptr,	//163
+	nullptr,	//164
+	nullptr,	//165
+	nullptr,	//166
+	nullptr,	//167
+	nullptr,	//168
+	nullptr,	//169
+	nullptr,	//170
+	nullptr,	//171
+	nullptr,	//172
+	nullptr,	//173
+	nullptr,	//174
+	nullptr,	//175
+	nullptr,	//176
+	nullptr,	//177
+	nullptr,	//178
+	nullptr,	//179
+	nullptr,	//180
+	nullptr,	//181
+	nullptr,	//182
+	nullptr,	//183
+	nullptr,	//184
+	nullptr,	//185
+	nullptr,	//186
+	nullptr,	//187
+	nullptr,	//188
+	nullptr,	//189
+	nullptr,	//190
+	nullptr,	//191
+	nullptr,	//192
+	nullptr,	//193
+	nullptr,	//194
+	nullptr,	//195
+	nullptr,	//196
 };
 
 static_assert(static_cast<size_t>(InstMnemonic::Mtfsb1) == _countof(insts));
