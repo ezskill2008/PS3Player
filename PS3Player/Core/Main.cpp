@@ -145,10 +145,7 @@ int main() {
 	ppu.guestMem = &mem;
 	ppu.guestMem->Map(static_cast<uint32_t>(ppu.reg.gpr[1]), procParams.primaryStackSize, false);
 
-	for (uint32_t i{ 0 };i < 30;++i) {
-		if(!PPUCycle(ppu))
-			break;
-	}
+	while (PPUCycle(ppu));
 
 	mem.Release();
 	LpsReleaseDisk(disk);

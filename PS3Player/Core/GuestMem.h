@@ -11,7 +11,9 @@ struct MemRange {
 
 struct GuestMem {
 	static constexpr uint64_t	kSize{ 1ull << 32 };
-	uint8_t* base{ nullptr };
+	static constexpr uint64_t	kPageSize{ 0x1000 };
+	static constexpr uint64_t	kPageMask{ kPageSize - 1 };
+	uint8_t*					base{ nullptr };
 	std::vector<MemRange>		ranges;
 
 	bool Init() {
@@ -37,15 +39,28 @@ struct GuestMem {
 		uint32_t addr,
 		uint64_t size,
 		bool exec) {
-		const uint64_t end{ uint64_t(addr) + size };
-		if (end > kSize) return false;
-		for (const MemRange& r : ranges) if (addr < r.end && end > r.start) return false;
+		if (!base) { printf("Map: Init() not called\n"); return false; }
+		if (size == 0) return true;
 
-		const uint64_t s{ addr & ~0xFFFull };
-		const uint64_t e{ (end + 0xFFF) & ~0xFFFull };
-		if (!VirtualAlloc(base + s, size_t(e - s), MEM_COMMIT, PAGE_READWRITE)) return false;
-		ranges.push_back({ addr, end, exec });
+		const uint64_t s{ uint64_t(addr) & ~kPageMask };
+		const uint64_t e{ (uint64_t(addr) + size + kPageMask) & ~kPageMask };
 
+		if (e > kSize) { printf("Map: range 0x%llx-0x%llx exceeds guest space\n", s, e); return false; }
+
+		for (const MemRange& r : ranges) {
+			if (s < r.end && e > r.start) {
+				printf("Map: range 0x%llx-0x%llx overlaps existing 0x%llx-0x%llx\n",
+					s, e, uint64_t(r.start), uint64_t(r.end));
+				return false;
+			}
+		}
+
+		if (!VirtualAlloc(base + s, size_t(e - s), MEM_COMMIT, PAGE_READWRITE)) {
+			printf("Map: VirtualAlloc failed (error %lu)\n", GetLastError());
+			return false;
+		}
+
+		ranges.push_back({ uint32_t(s), e, exec });
 		return true;
 	}
 
@@ -121,7 +136,7 @@ struct GuestMem {
 		uint8_t v) {
 		uint8_t* p{ base + addr };
 #if _DEBUG
-		if (!IsMapped(addr, sizeof(uint64_t))) {
+		if (!IsMapped(addr, sizeof(uint8_t))) {
 			printf("Invalid read/write!\n");
 			return;
 		}
@@ -134,7 +149,7 @@ struct GuestMem {
 		uint16_t v) {
 		uint8_t* p{ base + addr };
 #if _DEBUG
-		if (!IsMapped(addr, sizeof(uint64_t))) {
+		if (!IsMapped(addr, sizeof(uint16_t))) {
 			printf("Invalid read/write!\n");
 			return;
 		}
@@ -147,7 +162,7 @@ struct GuestMem {
 		uint32_t v) {
 		uint8_t* p{ base + addr };
 #if _DEBUG
-		if (!IsMapped(addr, sizeof(uint64_t))) {
+		if (!IsMapped(addr, sizeof(uint32_t))) {
 			printf("Invalid read/write!\n");
 			return;
 		}
