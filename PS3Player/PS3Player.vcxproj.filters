@@ -53,5 +53,8 @@
     <ClInclude Include="Emu\PPUFetch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Emu\HLE\HLERegistry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

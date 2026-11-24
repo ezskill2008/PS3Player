@@ -154,6 +154,7 @@
     <ClInclude Include="Core\GuestMem.h" />
     <ClInclude Include="DissAsm\DissAsm.h" />
     <ClInclude Include="Elf\Elf.h" />
+    <ClInclude Include="Emu\HLE\HLERegistry.h" />
     <ClInclude Include="Emu\PPU.h" />
     <ClInclude Include="Emu\PPUFetch.h" />
     <ClInclude Include="Emu\PPUInstructions.h" />

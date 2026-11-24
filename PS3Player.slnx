@@ -12,6 +12,7 @@
   <Folder Name="/Solution Items/">
     <File Path="readme.md" />
   </Folder>
+  <Project Path="FWExtractor/FWExtractor.vcxproj" Id="0921be78-abe8-418f-a88b-a94e0284f835" />
   <Project Path="PS3Player/PS3Player.vcxproj" Id="9820db42-e8a3-4c85-954d-6bbdc3df22b1">
     <BuildDependency Project="libPs3Core/libPs3Core.vcxproj" />
     <BuildDependency Project="libPs3Decrypt/libPs3Decrypt.vcxproj" />

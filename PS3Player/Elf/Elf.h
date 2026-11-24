@@ -18,6 +18,20 @@
 #define PROCPARAMS_MAGIC    0x13BCC5F6
 #define PRXPARAMS_MAGIC     0x1B434CEC
 
+#define ET_SCE_EXEC		    0xFE00		/* SCE Executable - PRX2 */
+#define ET_SCE_RELEXEC		0xFE04		/* SCE Relocatable Executable - PRX2 */
+#define ET_SCE_STUBLIB		0xFE0C		/* SCE SDK Stubs */
+#define ET_SCE_DYNEXEC		0xFE10		/* SCE EXEC_ASLR (PS4 Executable with ASLR) */
+#define ET_SCE_DYNAMIC		0xFE18		/* ? */
+#define ET_SCE_IOPRELEXEC	0xFF80		/* SCE IOP Relocatable Executable */
+#define ET_SCE_IOPRELEXEC2	0xFF81		/* SCE IOP Relocatable Executable Version 2 */
+#define ET_SCE_EERELEXEC	0xFF90		/* SCE EE Relocatable Executable */
+#define ET_SCE_EERELEXEC2	0xFF91		/* SCE EE Relocatable Executable Version 2 */
+#define ET_SCE_PSPRELEXEC	0xFFA0		/* SCE PSP Relocatable Executable */
+#define ET_SCE_PPURELEXEC	0xFFA4		/* SCE PPU Relocatable Executable */
+#define ET_SCE_ARMRELEXEC	0xFFA5		/* ?SCE ARM Relocatable Executable (PS Vita System Software earlier or equal 0.931.010) */
+#define ET_SCE_PSPOVERLAY	0xFFA8		/* ? */
+
 enum ElfType : uint16_t {
     ET_NONE = 0,
     ET_REL = 1,
