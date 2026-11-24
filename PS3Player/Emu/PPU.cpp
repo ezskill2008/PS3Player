@@ -75,17 +75,88 @@ updateRc(PPU& ppu, uint64_t r) {
 }
 
 namespace branch {
+#pragma region branch
 void
 b(PPU& ppu) {
-	const uint32_t cia{ ppu.reg.pc };
-	const uint32_t nia{ ppu.inst.BranchTargetLI(cia) };
-
 	if (ppu.inst.lk) {
-		ppu.reg.lr = cia + 4;
+		ppu.reg.lr = ppu.cia + 4;
 	}
 
-	ppu.reg.pc = nia;
+	ppu.reg.pc = ppu.inst.BranchTargetLI(ppu.cia);
 }
+
+void
+bc(PPU& ppu) {
+	DEFINE_OPS(bo, bi);
+
+	const bool noCtr{ (bo & 0x04) != 0 };    // BO_2: don't decrement CTR
+	const bool ctrZero{ (bo & 0x02) != 0 };  // BO_3: branch if CTR == 0 (else if != 0)
+	const bool noCond{ (bo & 0x10) != 0 };   // BO_0: ignore the CR bit
+	const bool condVal{ (bo & 0x08) != 0 };  // BO_1: required value of CR[BI]
+
+	if (!noCtr) {
+		ppu.reg.ctr -= 1;
+	}
+
+	const bool crBit{ ((ppu.reg.cr >> (31 - bi)) & 1) != 0 };
+	const bool ctrOk{ noCtr || ((ppu.reg.ctr != 0) != ctrZero) };
+	const bool condOk{ noCond || (crBit == condVal) };
+
+	if (ppu.inst.lk) {
+		ppu.reg.lr = ppu.cia + 4;
+	}
+
+	if (ctrOk && condOk) {
+		ppu.reg.pc = ppu.inst.BranchTargetBD(ppu.cia);
+	}
+}
+
+void
+bclr(PPU& ppu) {
+	DEFINE_OPS(bo, bi);
+
+	const bool noCtr{ (bo & 0x04) != 0 };
+	const bool ctrZero{ (bo & 0x02) != 0 };
+	const bool noCond{ (bo & 0x10) != 0 };
+	const bool condVal{ (bo & 0x08) != 0 };
+	const uint32_t target{ static_cast<uint32_t>(ppu.reg.lr) & ~3u };
+
+	if (!noCtr) {
+		ppu.reg.ctr -= 1;
+	}
+
+	const bool crBit{ ((ppu.reg.cr >> (31 - bi)) & 1) != 0 };
+	const bool ctrOk{ noCtr || ((ppu.reg.ctr != 0) != ctrZero) };
+	const bool condOk{ noCond || (crBit == condVal) };
+
+	if (ppu.inst.lk) {
+		ppu.reg.lr = ppu.cia + 4;
+	}
+
+	if (ctrOk && condOk) {
+		ppu.reg.pc = target;
+	}
+}
+
+void
+bcctr(PPU& ppu) {
+	DEFINE_OPS(bo, bi);
+
+	const bool noCond{ (bo & 0x10) != 0 };   // BO_0: ignore the CR bit
+	const bool condVal{ (bo & 0x08) != 0 };  // BO_1: required value of CR[BI]
+	const bool crBit{ ((ppu.reg.cr >> (31 - bi)) & 1) != 0 };
+	const bool condOk{ noCond || (crBit == condVal) };
+	const uint32_t target{ static_cast<uint32_t>(ppu.reg.ctr & ~static_cast<uint64_t>(3)) };
+
+	if (ppu.inst.lk) {
+		ppu.reg.lr = ppu.cia + 4;
+	}
+
+	if (condOk) {
+		ppu.reg.pc = target;
+	}
+}
+#pragma endregion
 }
 
 namespace fixedp {
@@ -1085,7 +1156,7 @@ constexpr static instructionOp insts[197]{
 	fixedp::addicd,	//8
 	fixedp::addi,	//9
 	fixedp::addis,	//10
-	nullptr,	//11
+	branch::bc,	//11
 	nullptr,	//12
 	branch::b,		//13
 	fixedp::rlwimi,	//14
@@ -1127,7 +1198,7 @@ constexpr static instructionOp insts[197]{
 	fixedp::std,	//50
 	fixedp::stdu,	//51
 	nullptr,	//52
-	nullptr,	//53
+	branch::bclr,	//53
 	nullptr,	//54
 	nullptr,	//55
 	nullptr,	//56
@@ -1136,7 +1207,7 @@ constexpr static instructionOp insts[197]{
 	nullptr,	//59
 	nullptr,	//60
 	nullptr,	//61
-	nullptr,	//62
+	branch::bcctr,	//62
 	fixedp::rldicl,	//63
 	fixedp::rldicr,	//64
 	fixedp::rldic,	//65
@@ -1217,8 +1288,8 @@ constexpr static instructionOp insts[197]{
 	nullptr,	//140
 	nullptr,	//141
 	nullptr,	//142
-	fixedp::mtspr,	//143
-	fixedp::mfspr,	//144
+	fixedp::mfspr,	//143
+	fixedp::mtspr,	//144
 	fixedp::mfcr,	//145
 	fixedp::mtcrf,	//146
 	nullptr,	//147
@@ -1278,13 +1349,15 @@ static_assert(static_cast<size_t>(InstMnemonic::Mtfsb1) == _countof(insts));
 bool
 PPUCycle(
 	PPU& ppu) {
-	ppu.inst = ppu.guestMem->Read32(ppu.reg.pc);
+	ppu.cia = ppu.reg.pc;
+	ppu.inst = ppu.guestMem->Read32(ppu.cia);
 
 #if 1
-	PrintInstruction(ppu.inst.raw, ppu.reg.pc);
+	PrintInstruction(ppu.inst.raw, ppu.cia);
 #endif
 
-	ppu.reg.pc += 4;
+	ppu.reg.pc = ppu.cia + 4;
+
 
 	if (!DecodeInstruction(ppu.inst, ppu.instData)) {
 		printf("Failed to decode instruction!\n");

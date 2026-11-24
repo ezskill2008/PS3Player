@@ -87,7 +87,7 @@ struct GuestMem {
 		const uint8_t* p{ base + addr };
 #if _DEBUG
 		if (!IsMapped(addr, sizeof(uint8_t))) {
-			printf("Invalid read/write!\n");
+			printf("Invalid read/write! 0x%llx\n", static_cast<uint64_t>(addr));
 			return 0;
 		}
 #endif
@@ -99,7 +99,7 @@ struct GuestMem {
 		const uint8_t* p{ base + addr };
 #if _DEBUG
 		if (!IsMapped(addr, sizeof(uint16_t))) {
-			printf("Invalid read/write!\n");
+			printf("Invalid read/write! 0x%llx\n", static_cast<uint64_t>(addr));
 			return 0;
 		}
 #endif
@@ -111,7 +111,7 @@ struct GuestMem {
 		const uint8_t* p{ base + addr };
 #if _DEBUG
 		if (!IsMapped(addr, sizeof(uint32_t))) {
-			printf("Invalid read/write!\n");
+			printf("Invalid read/write! 0x%llx\n", static_cast<uint64_t>(addr));
 			return 0;
 		}
 #endif
@@ -123,7 +123,7 @@ struct GuestMem {
 		const uint8_t* p{ base + addr };
 #if _DEBUG
 		if (!IsMapped(addr, sizeof(uint64_t))) {
-			printf("Invalid read/write!\n");
+			printf("Invalid read/write! 0x%llx\n", static_cast<uint64_t>(addr));
 			return 0;
 		}
 #endif
@@ -137,7 +137,7 @@ struct GuestMem {
 		uint8_t* p{ base + addr };
 #if _DEBUG
 		if (!IsMapped(addr, sizeof(uint8_t))) {
-			printf("Invalid read/write!\n");
+			printf("Invalid read/write! 0x%llx\n", static_cast<uint64_t>(addr));
 			return;
 		}
 #endif
@@ -150,7 +150,7 @@ struct GuestMem {
 		uint8_t* p{ base + addr };
 #if _DEBUG
 		if (!IsMapped(addr, sizeof(uint16_t))) {
-			printf("Invalid read/write!\n");
+			printf("Invalid read/write! 0x%llx\n", static_cast<uint64_t>(addr));
 			return;
 		}
 #endif
@@ -163,7 +163,7 @@ struct GuestMem {
 		uint8_t* p{ base + addr };
 #if _DEBUG
 		if (!IsMapped(addr, sizeof(uint32_t))) {
-			printf("Invalid read/write!\n");
+			printf("Invalid read/write! 0x%llx\n", static_cast<uint64_t>(addr));
 			return;
 		}
 #endif
@@ -176,7 +176,7 @@ struct GuestMem {
 		uint8_t* p{ base + addr };
 #if _DEBUG
 		if (!IsMapped(addr, sizeof(uint64_t))) {
-			printf("Invalid read/write!\n");
+			printf("Invalid read/write! 0x%llx\n", static_cast<uint64_t>(addr));
 			return;
 		}
 #endif

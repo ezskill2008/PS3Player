@@ -26,6 +26,7 @@ struct PPU {
 	InstData		instData{};
 	GuestMem*		guestMem{};
 	uint64_t		operands[5]{};
+	uint32_t		cia{ 0 };
 };
 
 bool PPUCycle(
