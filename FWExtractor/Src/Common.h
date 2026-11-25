@@ -34,3 +34,18 @@ typedef struct ScePupDigestEntry { // size is 0x20-bytes
 typedef struct {
 	uint8_t			digest[0x14]; // HMAC-SHA1
 } PUPHeaderDigest;
+
+enum class SegmentId {
+	Version = 0x100,
+	License = 0x101,
+	PromoFlags = 0x102,
+	UpdateFlags = 0x103,
+	PatchBuild = 0x104,
+	Ps3Swu = 0x200,
+	Vsh = 0x201,
+	Dots = 0x202,
+	PatchData = 0x203,
+	UpdateFiles = 0x300,
+	SpkgHdr = 0x501,
+	Ps3Swu2 = 0x601,
+};

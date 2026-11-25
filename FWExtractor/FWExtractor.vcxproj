@@ -144,9 +144,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main.cpp" />
+    <ClCompile Include="Src\TarLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Common.h" />
+    <ClInclude Include="Src\TarLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

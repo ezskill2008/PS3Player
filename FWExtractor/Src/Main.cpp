@@ -1,4 +1,7 @@
 #include <Src/Common.h>
+#include <Src/TarLoader.h>
+
+#include <libPs3Decrypt/Include/DecryptSELF.h>
 
 #pragma comment(lib, "libPs3Core.lib")
 
@@ -8,6 +11,18 @@ struct PupPackage {
 	ScePupHeader					hdr{};
 	std::vector<ScePupSegmentEntry>	entries{};
 };
+
+ScePupSegmentEntry
+findSegmentById(
+	const PupPackage& pup,
+	uint64_t id) {
+	for (const auto& e : pup.entries) {
+		if (e.id == id)
+			return e;
+	}
+
+	return {};
+}
 
 bool
 loadPackageFile(
@@ -60,6 +75,39 @@ parsePup(
 	return true;
 }
 
+bool
+installFirmWare(
+	PupPackage& pup,
+	const char* targetDir) {
+	if (!(pup.pupFile.is_open() && targetDir))
+		return false;
+
+	if (!std::filesystem::exists(targetDir)) {
+		if (!std::filesystem::create_directories(targetDir))
+			return false;
+	}
+
+	const ScePupSegmentEntry e{ findSegmentById(pup, static_cast<uint64_t>(SegmentId::UpdateFiles)) };
+	if (e.id != static_cast<uint64_t>(SegmentId::UpdateFiles)) return false;
+
+	size_t buffer_size{ static_cast<size_t>(e.size) };
+	std::vector<uint8_t> buffer{};
+	buffer.resize(buffer_size);
+
+	pup.pupFile.seekg(e.offset);
+	pup.pupFile.read(reinterpret_cast<char*>(buffer.data()), buffer_size);
+	
+	std::vector<TarEntry> entries{};
+
+	if (!ParseTarFile(buffer, entries)) {
+		return false;
+	}
+
+	LogTarEntries(entries);
+
+	return true;
+}
+
 int main(int argc, char** argv) {
 	PupPackage pup{};
 
@@ -73,5 +121,8 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 
-
+	if (!installFirmWare(pup, "D:\\CEX4.93\\")) {
+		printf("Failed to install pup!\n");
+		return -1;
+	}
 }
